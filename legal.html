@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spook — Legal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --paper:#FFFFFF;
+  --ink:#0A0A0A;
+  --ink-soft:#494949;
+  --muted:#9A9A9A;
+  --hairline:#EAEAEA;
+  --accent:#C8FA3A;
+  --maxw:1080px;
+  --pad:clamp(20px,5vw,64px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Geist",system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+.mono{font-family:"Geist Mono",ui-monospace,monospace}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+::selection{background:var(--accent);color:#0A0A0A}
+.wrap{max-width:var(--maxw);margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
+.lnk{box-shadow:inset 0 -.4em 0 var(--accent)}
+
+/* header */
+.head{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);
+  backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--hairline)}
+.head .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:18px;letter-spacing:-.02em}
+.brand img{width:22px;height:auto}
+.back{font-size:14px;color:var(--muted);transition:color .15s;white-space:nowrap}
+.back:hover{color:var(--ink)}
+
+/* page head */
+.page-head{padding:clamp(44px,7vw,84px) 0 clamp(28px,4vw,44px);border-bottom:1px dashed var(--hairline)}
+.eyebrow{font-family:"Geist Mono",monospace;font-size:12px;font-weight:500;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--muted);display:inline-flex;align-items:center;gap:9px}
+.eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none}
+.page-head h1{font-size:clamp(32px,5vw,52px);font-weight:600;letter-spacing:-.025em;line-height:1.05;margin:18px 0 14px}
+.page-head p{color:var(--ink-soft);max-width:52ch}
+.updated{margin-top:18px;font-family:"Geist Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+/* layout */
+.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:clamp(32px,5vw,72px);padding-top:clamp(36px,5vw,56px);padding-bottom:clamp(64px,8vw,96px)}
+.toc{position:sticky;top:92px;align-self:start;display:flex;flex-direction:column;gap:26px}
+.toc-group{display:flex;flex-direction:column;gap:8px}
+.toc-title{font-family:"Geist Mono",monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.toc a{font-size:14px;color:var(--ink-soft);padding:2px 0;transition:color .15s}
+.toc a:hover{color:var(--ink)}
+.toc a.lead-link{font-weight:500;color:var(--ink)}
+
+/* documents */
+.doc{padding-top:8px;margin-bottom:clamp(56px,8vw,88px);scroll-margin-top:96px}
+.doc:last-child{margin-bottom:0}
+.doc-head{display:flex;flex-direction:column;gap:10px;padding-bottom:26px;margin-bottom:34px;border-bottom:1px solid var(--ink)}
+.doc-num{font-family:"Geist Mono",monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.doc-head h2{font-size:clamp(26px,3.4vw,36px);font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.doc-head .meta{font-family:"Geist Mono",monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.doc-intro{color:var(--ink-soft);font-size:15.5px;max-width:64ch;margin-bottom:8px}
+.doc-intro p{margin-bottom:10px}
+.kv{margin:16px 0 6px;display:flex;flex-direction:column;gap:4px;font-size:14.5px;max-width:64ch}
+.kv div{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--hairline)}
+.kv dt{font-family:"Geist Mono",monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);flex:none;width:130px;padding-top:2px}
+.kv dd{color:var(--ink)}
+.clause{padding:26px 0;border-top:1px dashed var(--hairline)}
+.clause h3{display:flex;gap:14px;align-items:baseline;font-size:18px;font-weight:600;letter-spacing:-.01em;margin-bottom:10px}
+.clause h3 .n{font-family:"Geist Mono",monospace;font-size:13px;font-weight:500;color:var(--muted);flex:none}
+.clause h4{display:flex;gap:10px;align-items:baseline;font-size:15.5px;font-weight:600;margin:20px 0 6px}
+.clause h4 .n{font-family:"Geist Mono",monospace;font-size:12px;font-weight:500;color:var(--muted);flex:none}
+.clause p{color:var(--ink-soft);font-size:15.5px;max-width:64ch;margin-bottom:10px}
+.clause p:last-child{margin-bottom:0}
+.clause ul{margin:6px 0 12px 20px;color:var(--ink-soft);font-size:15.5px;max-width:62ch;display:flex;flex-direction:column;gap:6px}
+.clause b{color:var(--ink);font-weight:600}
+.note{border:1px solid var(--ink);border-radius:10px;padding:15px 18px;max-width:64ch;margin:14px 0 10px;
+  font-size:14.5px;color:var(--ink);line-height:1.55}
+.note .tag{display:block;font-family:"Geist Mono",monospace;font-size:11px;font-weight:500;letter-spacing:.16em;
+  text-transform:uppercase;margin-bottom:6px;color:var(--ink)}
+.note .tag::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:8px}
+.tbl{width:100%;max-width:64ch;border-collapse:collapse;font-size:14px;margin:8px 0 12px}
+.tbl th{font-family:"Geist Mono",monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);text-align:left;padding:0 16px 9px 0;border-bottom:1px solid var(--ink)}
+.tbl td{padding:11px 16px 11px 0;border-bottom:1px dashed var(--hairline);vertical-align:top;color:var(--ink-soft)}
+.tbl td:first-child{color:var(--ink);font-weight:500;white-space:nowrap}
+
+/* footer */
+.foot{background:#000;color:#fff;padding:44px 0 52px}
+.foot .wrap{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.foot .brand img{filter:invert(1)}
+.foot-legal{font-family:"Geist Mono",monospace;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:#5a5a5a}
+
+@media(max-width:780px){
+  .layout{grid-template-columns:1fr;gap:36px}
+  .toc{position:static;flex-direction:row;flex-wrap:wrap;gap:18px 28px;padding-bottom:8px;border-bottom:1px dashed var(--hairline)}
+  .toc-group{gap:6px}
+  .tbl td:first-child{white-space:normal}
+}
+@media print{
+  .head,.toc,.foot{display:none}
+  .layout{grid-template-columns:1fr}
+  body{font-size:12pt}
+}
+</style>
+</head>
+<body>
+
+<header class="head">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="assets/landing/logo-mark.png" alt="Spook" /><span>Spook</span></a>
+    <a class="back" href="index.html">← Volver a Spook</a>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Legal</span>
+    <h1>Términos y privacidad</h1>
+    <p>Los documentos que rigen el uso de Spook. Claros y sin letra pequeña, como la app.</p>
+    <p class="updated">Última actualización · 11 Jun 2026</p>
+  </div>
+</section>
+
+<div class="wrap layout">
+
+  <nav class="toc" aria-label="Documentos">
+    <div class="toc-group">
+      <span class="toc-title">Documentos</span>
+      <a class="lead-link" href="#privacidad">Política de Privacidad</a>
+      <a class="lead-link" href="#terminos">Términos y Condiciones</a>
+    </div>
+    <div class="toc-group">
+      <span class="toc-title">Contacto</span>
+      <a href="mailto:spook.ai.app@gmail.com">spook.ai.app@gmail.com</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- ============ DOC 01 · POLÍTICA DE PRIVACIDAD ============ -->
+    <article class="doc" id="privacidad">
+      <div class="doc-head">
+        <span class="doc-num">Doc 01</span>
+        <h2>Política de Privacidad</h2>
+        <span class="meta">Última actualización · 11 Jun 2026</span>
+      </div>
+
+      <div class="doc-intro">
+        <p>Spook ("la App", "nosotros") es una aplicación de finanzas personales que registra tus gastos a partir de fotos de facturas o descripciones por voz. Esta política explica qué datos tratamos, para qué y con quién, en cumplimiento de la Ley 1581 de 2012 y el Decreto 1377 de 2013 (Colombia).</p>
+        <dl class="kv">
+          <div><dt>Responsable</dt><dd>Santiago Salcedo</dd></div>
+          <div><dt>Contacto</dt><dd><a class="lnk" href="mailto:spook.ai.app@gmail.com">spook.ai.app@gmail.com</a></dd></div>
+        </dl>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">1.</span>Datos que recopilamos</h3>
+        <h4>Datos de cuenta</h4>
+        <p>Al iniciar sesión con Apple o Google recibimos tu <b>nombre</b> y <b>correo electrónico</b>. No recibimos ni almacenamos tus contraseñas.</p>
+        <h4>Fotos de facturas</h4>
+        <p>Las fotos que tomas o subes se procesan para extraer los datos de la compra (comercio, productos, montos, fecha, medio de pago). <b>La imagen no se almacena</b>: se procesa en memoria y se descarta. Solo conservamos los datos estructurados extraídos.</p>
+        <h4>Notas de voz</h4>
+        <p>La transcripción de voz a texto ocurre en tu dispositivo mediante el reconocimiento de voz del sistema (Apple). Nosotros recibimos únicamente el <b>texto transcrito</b>, lo procesamos para extraer los datos del gasto y <b>no almacenamos la transcripción original</b>, solo los datos estructurados.</p>
+        <h4>Datos de tus gastos</h4>
+        <p>Conservamos los recibos resultantes: nombre del comercio, categoría, productos, montos, fecha, medio de pago (sin números completos de tarjeta; solo los últimos dígitos cuando aparecen en la factura).</p>
+        <h4>Otros datos técnicos</h4>
+        <ul>
+          <li><b>Token de notificaciones push</b>, para avisarte cuando un recibo termina de procesarse.</li>
+          <li><b>Metadatos de procesamiento</b> (tiempos, costos de procesamiento, errores), sin contenido de tus facturas.</li>
+          <li><b>Estado de suscripción</b> (plan gratuito o premium).</li>
+        </ul>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">2.</span>Para qué usamos tus datos</h3>
+        <ul>
+          <li>Prestar el servicio: registrar, categorizar y mostrarte tus gastos.</li>
+          <li>Procesar tus facturas y notas de voz con inteligencia artificial.</li>
+          <li>Enviarte notificaciones sobre el estado de tus recibos.</li>
+          <li>Gestionar tu suscripción y los límites del plan gratuito.</li>
+          <li>Atender solicitudes de soporte.</li>
+        </ul>
+        <div class="note"><span class="tag">Compromiso</span>No vendemos tus datos ni los usamos para publicidad.</div>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">3.</span>Terceros que procesan datos</h3>
+        <p>Para operar la App compartimos datos con estos proveedores, únicamente en la medida necesaria:</p>
+        <table class="tbl">
+          <thead><tr><th>Proveedor</th><th>Propósito</th><th>Datos</th></tr></thead>
+          <tbody>
+            <tr><td>Anthropic (Claude)</td><td>Extracción de datos de facturas y notas de voz con IA</td><td>Imagen de la factura / texto transcrito (no se usan para entrenar modelos)</td></tr>
+            <tr><td>Apple / Google</td><td>Inicio de sesión</td><td>Verificación de identidad</td></tr>
+            <tr><td>RevenueCat / App Store</td><td>Gestión de suscripciones</td><td>Identificador de usuario y estado de compra</td></tr>
+            <tr><td>Expo / Apple (APNs)</td><td>Notificaciones push</td><td>Token del dispositivo</td></tr>
+            <tr><td>Fly.io</td><td>Alojamiento del servidor y base de datos</td><td>Todos los datos descritos arriba</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">4.</span>Seguridad</h3>
+        <p>Toda la comunicación entre la App y nuestros servidores viaja cifrada (HTTPS). El acceso a tus datos requiere autenticación. Las credenciales de sesión se guardan en el almacenamiento seguro del dispositivo (Keychain).</p>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">5.</span>Retención y eliminación</h3>
+        <p>Conservamos tus datos mientras tu cuenta esté activa. Puedes eliminar recibos individuales desde la App en cualquier momento. Para eliminar tu cuenta y todos los datos asociados, escríbenos a <a class="lnk" href="mailto:spook.ai.app@gmail.com">spook.ai.app@gmail.com</a> y la eliminaremos en un plazo máximo de 15 días hábiles.</p>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">6.</span>Tus derechos</h3>
+        <p>De acuerdo con la Ley 1581 de 2012, puedes conocer, actualizar, rectificar y suprimir tus datos, así como revocar la autorización para su tratamiento. Ejerce estos derechos escribiendo a <a class="lnk" href="mailto:spook.ai.app@gmail.com">spook.ai.app@gmail.com</a>.</p>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">7.</span>Menores de edad</h3>
+        <p>Spook no está dirigida a menores de 14 años y no recopilamos conscientemente datos de menores.</p>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">8.</span>Cambios a esta política</h3>
+        <p>Si cambiamos esta política, actualizaremos la fecha al inicio del documento y, si el cambio es relevante, te lo notificaremos dentro de la App.</p>
+      </div>
+    </article>
+
+    <!-- ============ DOC 02 · TÉRMINOS Y CONDICIONES ============ -->
+    <article class="doc" id="terminos">
+      <div class="doc-head">
+        <span class="doc-num">Doc 02</span>
+        <h2>Términos y Condiciones de Uso</h2>
+        <span class="meta">Versión 1.1 · Vigente desde 9 Jun 2026 · Colombia</span>
+      </div>
+
+      <div class="clause" style="border-top:none;padding-top:0">
+        <h3><span class="n">1.</span>Identificación del Responsable</h3>
+        <p>Spook es una aplicación móvil de gestión de finanzas personales desarrollada y operada por Santiago Salcedo (en adelante, "Spook", "nosotros" o "el Desarrollador"), con domicilio en la República de Colombia.</p>
+        <p>Para cualquier consulta relacionada con estos Términos y Condiciones, el usuario puede contactarse a través de: <a class="lnk" href="mailto:spook.ai.app@gmail.com">spook.ai.app@gmail.com</a></p>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">2.</span>Objeto del Servicio</h3>
+        <p>Spook es una herramienta de registro y categorización de gastos personales. A través de la aplicación, el usuario puede:</p>
+        <ul>
+          <li>Fotografiar recibos físicos para que la inteligencia artificial los analice y categorice automáticamente. Las imágenes se procesan en tiempo real y no se almacenan: una vez extraída la información, la fotografía se descarta de inmediato.</li>
+          <li>Registrar gastos mediante descripción de voz.</li>
+          <li>Visualizar su historial de gastos organizado por categorías y fechas.</li>
+          <li>Consultar estadísticas de sus hábitos de consumo.</li>
+        </ul>
+        <div class="note"><span class="tag">Aviso importante</span>Spook NO es una herramienta de asesoría financiera, contable ni tributaria. La información presentada tiene carácter informativo y de registro personal. El usuario es el único responsable de sus decisiones financieras. Spook no garantiza la exactitud de la categorización automática realizada por inteligencia artificial.</div>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">3.</span>Aceptación de los Términos</h3>
+        <p>El acceso y uso de Spook implica la aceptación plena e incondicional de los presentes Términos y Condiciones por parte del usuario. Si el usuario no está de acuerdo con alguna de las disposiciones aquí establecidas, deberá abstenerse de utilizar la aplicación.</p>
+        <p>De conformidad con el artículo 845 del Código de Comercio colombiano y la Ley 527 de 1999 sobre comercio electrónico, la aceptación electrónica de estos términos tiene plena validez jurídica.</p>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">4.</span>Condiciones de Uso y Requisitos del Usuario</h3>
+        <h4><span class="n">4.1</span>Edad mínima</h4>
+        <p>El uso de Spook está permitido únicamente a personas mayores de 18 años, o menores de edad con autorización expresa de su representante legal, de conformidad con el artículo 34 del Código Civil colombiano modificado por la Ley 1306 de 2009.</p>
+        <h4><span class="n">4.2</span>Registro y autenticación</h4>
+        <p>El acceso a Spook requiere autenticación mediante proveedores de identidad de terceros (Google Sign-In o Apple Sign-In). El usuario es responsable de mantener la seguridad de sus credenciales de acceso y de todas las actividades realizadas desde su cuenta.</p>
+        <h4><span class="n">4.3</span>Uso aceptable</h4>
+        <p>El usuario se compromete a utilizar Spook únicamente para los fines descritos en la Sección 2, y a no:</p>
+        <ul>
+          <li>Usar la aplicación para actividades ilícitas o contrarias a las leyes colombianas.</li>
+          <li>Intentar acceder a cuentas de otros usuarios o a los sistemas de Spook sin autorización.</li>
+          <li>Cargar imágenes que no correspondan a recibos o facturas propias.</li>
+          <li>Reproducir, distribuir o explotar comercialmente el contenido de la aplicación sin autorización expresa.</li>
+        </ul>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">5.</span>Modelo de Servicio y Condiciones Económicas</h3>
+        <h4><span class="n">5.1</span>Plan gratuito (prueba)</h4>
+        <p>Todo usuario nuevo tiene acceso a una prueba gratuita que comprende el registro de hasta 7 (siete) recibos, contabilizados desde la fecha de creación de la cuenta. Durante esta prueba el usuario puede utilizar todas las funcionalidades de la aplicación sin restricciones. La prueba gratuita no está sujeta a límite de tiempo: permanece disponible hasta que el usuario haya registrado los 7 recibos.</p>
+        <h4><span class="n">5.2</span>Plan premium</h4>
+        <p>Una vez agotada la prueba gratuita, es decir, registrados los 7 recibos incluidos, el acceso a las funcionalidades de creación de nuevos recibos estará condicionado a la contratación de un plan de pago. Los precios, condiciones y métodos de pago serán informados al usuario dentro de la aplicación y podrán ser actualizados con previo aviso de 30 días.</p>
+        <h4><span class="n">5.3</span>Política de reembolsos</h4>
+        <p>De conformidad con el Estatuto del Consumidor colombiano (Ley 1480 de 2011), el usuario tiene derecho a solicitar la reversión del pago en los casos previstos por la ley. Las solicitudes de reembolso deben remitirse a <a class="lnk" href="mailto:spook.ai.app@gmail.com">spook.ai.app@gmail.com</a> dentro de los 5 días hábiles siguientes al cargo.</p>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">6.</span>Propiedad Intelectual</h3>
+        <p>De conformidad con la Ley 23 de 1982 sobre Derechos de Autor y la Decisión Andina 351 de 1993, todos los derechos de propiedad intelectual sobre Spook, incluyendo sin limitación el código fuente, diseño, marca, logotipo, nombre comercial y contenidos, son de titularidad exclusiva del Desarrollador.</p>
+        <p>El usuario obtiene únicamente una licencia de uso personal, intransferible y no exclusiva para utilizar la aplicación en los términos aquí descritos. Queda expresamente prohibida cualquier reproducción, distribución, modificación o explotación comercial sin autorización previa y escrita.</p>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">7.</span>Limitación de Responsabilidad</h3>
+        <h4><span class="n">7.1</span>Precisión de la inteligencia artificial</h4>
+        <p>Spook utiliza modelos de inteligencia artificial de terceros (Anthropic, Inc.) para el análisis y categorización de recibos. El Desarrollador no garantiza la exactitud, completitud o idoneidad de los resultados generados por la IA. La categorización automática es una estimación y puede contener errores.</p>
+        <div class="note"><span class="tag">Nota</span>El usuario debe verificar la información categorizada por la IA antes de tomar cualquier decisión basada en ella. Spook no será responsable por pérdidas o daños derivados de la confianza depositada en categorizaciones incorrectas.</div>
+        <h4><span class="n">7.2</span>Disponibilidad del servicio</h4>
+        <p>Spook se presta en modalidad "tal cual" (as-is). El Desarrollador no garantiza la disponibilidad ininterrumpida del servicio y se reserva el derecho de realizar mantenimientos, actualizaciones o interrupciones del servicio con o sin previo aviso.</p>
+        <h4><span class="n">7.3</span>Límite de responsabilidad</h4>
+        <p>En la máxima medida permitida por la legislación colombiana aplicable, la responsabilidad total del Desarrollador frente al usuario por cualquier causa o concepto no podrá exceder el valor pagado por el usuario en los 3 meses anteriores al evento que generó la reclamación.</p>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">8.</span>Suspensión y Terminación de la Cuenta</h3>
+        <p>El Desarrollador se reserva el derecho de suspender o eliminar la cuenta de un usuario en los siguientes casos:</p>
+        <ul>
+          <li>Violación de los presentes Términos y Condiciones.</li>
+          <li>Uso fraudulento o no autorizado de la aplicación.</li>
+          <li>Incumplimiento en el pago del plan premium una vez agotada la prueba gratuita.</li>
+          <li>Requerimiento de autoridades competentes en virtud de la legislación colombiana.</li>
+        </ul>
+        <p>El usuario puede eliminar su cuenta en cualquier momento desde la sección de configuración de la aplicación. La eliminación de la cuenta implica la supresión permanente de todos sus datos personales de conformidad con la Política de Privacidad.</p>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">9.</span>Modificaciones de los Términos</h3>
+        <p>El Desarrollador se reserva el derecho de modificar los presentes Términos y Condiciones en cualquier momento. Los cambios serán notificados al usuario mediante correo electrónico y/o notificación dentro de la aplicación con un mínimo de 30 días de antelación a su entrada en vigor.</p>
+        <p>El uso continuado de la aplicación tras la entrada en vigor de los nuevos términos constituirá la aceptación tácita de los mismos por parte del usuario.</p>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">10.</span>Ley Aplicable y Resolución de Conflictos</h3>
+        <p>Los presentes Términos y Condiciones se rigen por las leyes de la República de Colombia, en particular:</p>
+        <ul>
+          <li>Ley 527 de 1999 — Comercio electrónico y firmas digitales.</li>
+          <li>Ley 1480 de 2011 — Estatuto del Consumidor.</li>
+          <li>Código de Comercio colombiano — Decreto 410 de 1971.</li>
+          <li>Ley 1581 de 2012 — Protección de datos personales.</li>
+        </ul>
+        <p>Cualquier controversia derivada del uso de Spook será sometida en primera instancia a mecanismos de resolución directa. De no llegarse a un acuerdo, las partes se someterán a los jueces competentes de la ciudad de Villavicencio, Colombia, renunciando expresamente a cualquier otro fuero que pudiera corresponderles.</p>
+      </div>
+
+      <div class="clause">
+        <h3><span class="n">11.</span>Contacto y Vigencia</h3>
+        <p>Los presentes documentos legales entran en vigencia a partir del 9 de junio de 2026 y permanecerán vigentes hasta su modificación o sustitución.</p>
+        <p>Para cualquier consulta, reclamo o ejercicio de derechos: <a class="lnk" href="mailto:spook.ai.app@gmail.com">spook.ai.app@gmail.com</a> · Tiempo de respuesta: máximo 15 días hábiles.</p>
+        <p>Para consultas relacionadas con protección de datos puede contactar adicionalmente a la Superintendencia de Industria y Comercio (SIC): <a class="lnk" href="https://www.sic.gov.co" target="_blank" rel="noopener">www.sic.gov.co</a> · Línea SIC: 601 592 0400.</p>
+      </div>
+    </article>
+
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="assets/landing/logo-mark.png" alt="Spook" /><span>Spook</span></a>
+    <span class="foot-legal">© 2026 Spook · Hecho en Colombia</span>
+  </div>
+</footer>
+
+</body>
+</html>
