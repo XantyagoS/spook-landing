@@ -124,7 +124,7 @@ img{display:block;max-width:100%}
     <span class="eyebrow">Legal</span>
     <h1>Términos y privacidad</h1>
     <p>Los documentos que rigen el uso de Spook. Claros y sin letra pequeña, como la app.</p>
-    <p class="updated">Última actualización · 11 Jun 2026</p>
+    <p class="updated">Última actualización · 22 Ago 2026</p>
   </div>
 </section>
 
@@ -149,7 +149,7 @@ img{display:block;max-width:100%}
       <div class="doc-head">
         <span class="doc-num">Doc 01</span>
         <h2>Política de Privacidad</h2>
-        <span class="meta">Última actualización · 11 Jun 2026</span>
+        <span class="meta">Última actualización · 22 Ago 2026</span>
       </div>
 
       <div class="doc-intro">
@@ -165,11 +165,13 @@ img{display:block;max-width:100%}
         <h4>Datos de cuenta</h4>
         <p>Al iniciar sesión con Apple o Google recibimos tu <b>nombre</b> y <b>correo electrónico</b>. No recibimos ni almacenamos tus contraseñas.</p>
         <h4>Fotos de facturas</h4>
-        <p>Las fotos que tomas o subes se procesan para extraer los datos de la compra (comercio, productos, montos, fecha, medio de pago). <b>La imagen no se almacena</b>: se procesa en memoria y se descarta. Solo conservamos los datos estructurados extraídos.</p>
+        <p>Las fotos que tomas o subes se procesan para extraer los datos de la compra (comercio, monto, fecha, medio de pago). <b>La imagen se guarda en tu cuenta</b>, cifrada en reposo, para que puedas volver a verla desde el detalle del gasto. No la usamos para ningún otro fin y <b>se elimina de forma permanente</b> cuando borras el gasto o tu cuenta.</p>
+        <h4>Fotos adjuntas a gastos por voz</h4>
+        <p>A un gasto registrado por voz puedes adjuntarle después una foto como recordatorio (la factura, el producto, el lugar). Esa imagen no se procesa con inteligencia artificial: solo se guarda en tu cuenta y se muestra en el detalle del gasto, con las mismas reglas de eliminación.</p>
         <h4>Notas de voz</h4>
         <p>La transcripción de voz a texto ocurre en tu dispositivo mediante el reconocimiento de voz del sistema (Apple). Nosotros recibimos únicamente el <b>texto transcrito</b>, lo procesamos para extraer los datos del gasto y <b>no almacenamos la transcripción original</b>, solo los datos estructurados.</p>
         <h4>Datos de tus gastos</h4>
-        <p>Conservamos los recibos resultantes: nombre del comercio, categoría, productos, montos, fecha, medio de pago (sin números completos de tarjeta; solo los últimos dígitos cuando aparecen en la factura).</p>
+        <p>Conservamos los gastos resultantes: nombre del comercio, categoría, montos, fecha, ciudad y medio de pago (sin números completos de tarjeta; solo los últimos dígitos cuando aparecen en la factura). También las <b>etiquetas</b> que crees para organizarlos y los <b>presupuestos</b> mensuales que definas por categoría.</p>
         <h4>Otros datos técnicos</h4>
         <ul>
           <li><b>Token de notificaciones push</b>, para avisarte cuando un recibo termina de procesarse.</li>
@@ -183,7 +185,8 @@ img{display:block;max-width:100%}
         <ul>
           <li>Prestar el servicio: registrar, categorizar y mostrarte tus gastos.</li>
           <li>Procesar tus facturas y notas de voz con inteligencia artificial.</li>
-          <li>Enviarte notificaciones sobre el estado de tus recibos.</li>
+          <li>Mostrarte la foto de cada gasto cuando la consultes.</li>
+          <li>Enviarte notificaciones sobre el estado de tus recibos y cuando un gasto supere el presupuesto que definiste.</li>
           <li>Gestionar tu suscripción y los límites del plan gratuito.</li>
           <li>Atender solicitudes de soporte.</li>
         </ul>
@@ -197,6 +200,7 @@ img{display:block;max-width:100%}
           <thead><tr><th>Proveedor</th><th>Propósito</th><th>Datos</th></tr></thead>
           <tbody>
             <tr><td>Anthropic (Claude)</td><td>Extracción de datos de facturas y notas de voz con IA</td><td>Imagen de la factura / texto transcrito (no se usan para entrenar modelos)</td></tr>
+            <tr><td>Tigris Data (vía Fly.io)</td><td>Almacenamiento de las fotos de tus gastos</td><td>Imágenes, asociadas a tu cuenta mediante un identificador interno</td></tr>
             <tr><td>Apple / Google</td><td>Inicio de sesión</td><td>Verificación de identidad</td></tr>
             <tr><td>RevenueCat / App Store</td><td>Gestión de suscripciones</td><td>Identificador de usuario y estado de compra</td></tr>
             <tr><td>Expo / Apple (APNs)</td><td>Notificaciones push</td><td>Token del dispositivo</td></tr>
@@ -207,12 +211,12 @@ img{display:block;max-width:100%}
 
       <div class="clause">
         <h3><span class="n">4.</span>Seguridad</h3>
-        <p>Toda la comunicación entre la App y nuestros servidores viaja cifrada (HTTPS). El acceso a tus datos requiere autenticación. Las credenciales de sesión se guardan en el almacenamiento seguro del dispositivo (Keychain).</p>
+        <p>Toda la comunicación entre la App y nuestros servidores viaja cifrada (HTTPS). El acceso a tus datos requiere autenticación. Las fotos se guardan en un almacenamiento privado, cifrado en reposo, y solo pueden verse a través de enlaces temporales generados para tu sesión. Las credenciales de sesión se guardan en el almacenamiento seguro del dispositivo (Keychain).</p>
       </div>
 
       <div class="clause">
         <h3><span class="n">5.</span>Retención y eliminación</h3>
-        <p>Conservamos tus datos mientras tu cuenta esté activa. Puedes eliminar recibos individuales desde la App en cualquier momento. Para eliminar tu cuenta y todos los datos asociados, escríbenos a <a class="lnk" href="mailto:spook.ai.app@gmail.com">spook.ai.app@gmail.com</a> y la eliminaremos en un plazo máximo de 15 días hábiles.</p>
+        <p>Conservamos tus datos mientras tu cuenta esté activa. Puedes eliminar gastos individuales desde la App en cualquier momento; al hacerlo se borra también su foto. Puedes <b>eliminar tu cuenta desde la App</b> (Configuración → Eliminar cuenta): se suprimen de inmediato y de forma permanente todos tus datos, incluidas las fotos, etiquetas y presupuestos. Si prefieres, también puedes pedirlo a <a class="lnk" href="mailto:spook.ai.app@gmail.com">spook.ai.app@gmail.com</a> y lo haremos en un plazo máximo de 15 días hábiles.</p>
       </div>
 
       <div class="clause">
@@ -249,8 +253,9 @@ img{display:block;max-width:100%}
         <h3><span class="n">2.</span>Objeto del Servicio</h3>
         <p>Spook es una herramienta de registro y categorización de gastos personales. A través de la aplicación, el usuario puede:</p>
         <ul>
-          <li>Fotografiar recibos físicos para que la inteligencia artificial los analice y categorice automáticamente. Las imágenes se procesan en tiempo real y no se almacenan: una vez extraída la información, la fotografía se descarta de inmediato.</li>
-          <li>Registrar gastos mediante descripción de voz.</li>
+          <li>Fotografiar recibos físicos para que la inteligencia artificial los analice y categorice automáticamente. La fotografía se conserva en la cuenta del usuario como respaldo del gasto y puede consultarse desde la aplicación.</li>
+          <li>Registrar gastos mediante descripción de voz y, opcionalmente, adjuntarles una fotografía.</li>
+          <li>Organizar sus gastos con etiquetas y definir presupuestos mensuales por categoría.</li>
           <li>Visualizar su historial de gastos organizado por categorías y fechas.</li>
           <li>Consultar estadísticas de sus hábitos de consumo.</li>
         </ul>
