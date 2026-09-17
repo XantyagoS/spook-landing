@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@import "@fontsource-variable/hanken-grotesk";
+@import "@fontsource/geist-mono/400.css";
+@import "@fontsource/geist-mono/500.css";
+
+/* ---------------------------------------------------------------------------
+   Tokens de Spook.
+   Los colores salen tal cual de spook-frontend/src/constants/colors.ts — son la
+   misma paleta que ve el usuario dentro de la app. No inventar valores nuevos
+   aquí: si un color hace falta, primero existe en la app.
+   --------------------------------------------------------------------------- */
+@theme {
+  --font-sans: "Hanken Grotesk Variable", "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* claros */
+  --color-paper:      #FFFFFF;
+  --color-surface:    #FAFAFA;
+  --color-card:       #F7F7F7;
+  --color-border:     #F0F0F0;
+  --color-separator:  #F2F2F2;
+
+  /* tinta */
+  --color-ink:        #111111;
+  --color-ink-2:      #6E6E6B;  /* textHighSecondary */
+  --color-ink-3:      #999999;  /* textSecondary */
+  --color-ink-4:      #AAAAAA;  /* textTertiary */
+  --color-ink-5:      #C0C0C0;  /* inactive */
+
+  /* oscuros */
+  --color-night:      #111111;
+  --color-night-2:    #1A1A1A;
+  --color-night-3:    #202020;
+  --color-night-line: #2A2A2A;
+  --color-night-sep:  #222222;
+  --color-chalk:      #F5F5F5;
+  --color-chalk-2:    #CCCCCC;
+  --color-chalk-3:    #888888;
+  --color-chalk-4:    #666666;
+
+  /* acentos */
+  --color-lime:       #C8FA3A;
+  --color-on-lime:    #111111;
+  --color-income:     #2A9E00;
+  --color-danger:     #E02E32;
+  --color-review:     #12305E;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--color-lime);
+    color: var(--color-on-lime);
+  }
+  /* El hero y los títulos van con tracking negativo: es la firma tipográfica
+     de la app (Hanken Grotesk 600 apretada). */
+  h1, h2, h3 {
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

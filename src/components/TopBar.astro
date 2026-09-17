@@ -1,0 +1,76 @@
+---
+/** Barra superior: no existe al abrir. Aparece cuando el hero ya se fue. */
+---
+<header class="bar">
+  <a class="brand" href="#top">
+    <img src="/assets/landing/logo-mark.png" alt="" width="18" height="20" />
+    <span>Spook</span>
+  </a>
+  <a class="cta" href="#descargar">Descargar</a>
+</header>
+
+<style>
+  .bar {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 56px;
+    padding: 0 1.25rem;
+    background: color-mix(in srgb, var(--color-night) 72%, transparent);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-chalk) 8%, transparent);
+    /* Estado inicial: fuera de pantalla. */
+    translate: 0 -100%;
+    opacity: 0;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-chalk);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+  .brand img { width: 18px; height: auto; filter: invert(1); }
+
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 1rem;
+    border-radius: 999px;
+    background: var(--color-lime);
+    color: var(--color-on-lime);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .bar {
+      animation: bar-in linear both;
+      animation-timeline: scroll(root block);
+      /* Entra en el tramo final del hero, justo antes de soltar el anclaje. */
+      animation-range: 92dvh 114dvh;
+    }
+  }
+
+  @keyframes bar-in {
+    to { translate: 0 0; opacity: 1; }
+  }
+
+  /* Sin animaciones de scroll, la barra se queda visible desde el inicio
+     antes que desaparecer para siempre. */
+  @supports not (animation-timeline: scroll()) {
+    .bar { translate: 0 0; opacity: 1; }
+  }
+</style>
