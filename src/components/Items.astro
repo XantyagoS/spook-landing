@@ -1,0 +1,129 @@
+---
+/**
+ * Lista vertical de ítems con icono: nombre en negrita y un detalle corto
+ * debajo. La comparten Cómo funciona y Organiza.
+ *
+ * `icono` es el contenido interior de un SVG de Lucide (24×24, trazo).
+ */
+interface Item {
+  nombre: string;
+  detalle: string;
+  icono: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="formas">
+  {items.map(({ nombre, detalle, icono }) => (
+    <li class="forma">
+      <span class="icono" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" set:html={icono} />
+      </span>
+      <span class="texto">
+        <span class="nombre">{nombre}</span>
+        <span class="detalle">{detalle}</span>
+      </span>
+    </li>
+  ))}
+</ul>
+
+<style>
+  /* Siempre en vertical, también en escritorio: con el teléfono al lado no
+     hay ancho para tres columnas. */
+  .formas {
+    display: grid;
+    gap: 0.875rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .forma {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+  }
+
+  /* Círculo en el gris de los bordes, como los iconos de ajustes de iOS: el
+     lima se queda para lo que invita a actuar. */
+  .icono {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 999px;
+    background: var(--line);
+    color: var(--fg);
+    transition: background-color 0.28s ease, color 0.28s ease;
+  }
+  .icono svg { width: 1.125rem; height: 1.125rem; }
+
+  .texto {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .nombre {
+    font-size: var(--type-body);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    transition: color 0.28s ease;
+  }
+
+  .detalle {
+    font-size: var(--type-small);
+    color: var(--fg-2);
+    transition: color 0.28s ease;
+  }
+
+  @media (max-width: 819px) {
+    .texto { gap: 0; }
+    .nombre, .detalle { line-height: 1.35; }
+  }
+
+  /* Teléfonos bajos (un SE): cada píxel cuenta para que la lista no quede
+     bajo el globo del fantasma. */
+  @media (max-width: 819px) and (max-height: 740px) {
+    .formas { gap: 0.5rem; margin-top: 0.875rem; }
+  }
+
+  @media (min-width: 820px) {
+    .formas { gap: 1rem; margin-top: 1.5rem; }
+    .icono { width: 2.75rem; height: 2.75rem; }
+    .icono svg { width: 1.25rem; height: 1.25rem; }
+  }
+
+  /* ------------------------------------------------------------ entrada -- */
+  /* Split anima cada hijo directo de su bloque de texto, así que la lista
+     entraría como UN bloque. Aquí se anula eso y se escalona ítem a ítem.
+     La clase va duplicada a propósito: sube la especificidad por encima de la
+     regla de Split, y así gana sin depender de qué hoja carga después. */
+  :global(section[data-activa]) .formas.formas { animation: none; }
+
+  :global(section[data-activa]) .forma {
+    animation: surgir 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  /* Entran después del título y el párrafo que los preceden. */
+  :global(section[data-activa]) .forma:nth-child(1) { animation-delay: 220ms; }
+  :global(section[data-activa]) .forma:nth-child(2) { animation-delay: 300ms; }
+  :global(section[data-activa]) .forma:nth-child(3) { animation-delay: 380ms; }
+  :global(section[data-activa]) .forma:nth-child(4) { animation-delay: 460ms; }
+
+  @keyframes surgir {
+    from { opacity: 0; translate: 0 1.25rem; }
+    to   { opacity: 1; translate: 0 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(section[data-activa]) .forma { animation: none; }
+  }
+</style>

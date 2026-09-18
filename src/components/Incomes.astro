@@ -1,0 +1,73 @@
+---
+/**
+ * Ingresos: van por tipo, y registrarlos le da a Spook el panorama completo.
+ * El último párrafo abre la puerta a los reportes.
+ *
+ * Los tipos son el catálogo FIJO de la app (constants/incomeTypes.ts, espejo
+ * del backend), en su mismo orden. Si allí cambia, cambiarlo aquí.
+ *
+ * Textos en BORRADOR. En el teléfono, capturas reales que se pasan solas.
+ */
+import Split from './Split.astro';
+
+const tipos = ['Salario', 'Negocio', 'Arriendo', 'Préstamo', 'Venta', 'Regalo', 'Otro'];
+---
+
+<Split
+  id="ingresos"
+  label="¿Y los ingresos?"
+  nombre="Cómo funciona"
+  src="/assets/landing/iphone.png"
+  alt=""
+  width={389}
+  height={800}
+  pantalla={{
+    /* El modo ingresos: la lista y el resumen por tipo. */
+    imagenes: [
+      { src: '/assets/landing/ingresos-lista.webp', alt: 'La lista de ingresos del mes, cada uno con su tipo' },
+      { src: '/assets/landing/ingresos-tipos.webp', alt: 'El resumen de ingresos agrupado por tipo' },
+    ],
+    fondo: '#FFFFFF',
+  }}
+>
+  <h2>Sobre los ingresos</h2>
+  <p>Funcionan por tipo, según de dónde viene el dinero:</p>
+  <ul class="tipos">
+    {tipos.map((tipo) => <li>{tipo}</li>)}
+  </ul>
+  <p>
+    Registrarlos también importa: con lo que entra y lo que sale, Spook ve el
+    panorama completo de tu salud financiera. Y con eso arma tus reportes.
+  </p>
+</Split>
+
+<style>
+  /* Los tipos como etiquetas, en el gris de los iconos de las listas. */
+  .tipos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    max-width: 30rem;
+    margin: 0.9rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tipos li {
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    background: var(--line);
+    color: var(--fg);
+    font-size: var(--type-small);
+    font-weight: 500;
+    line-height: 1.3;
+    transition: background-color 0.28s ease, color 0.28s ease;
+  }
+
+  /* El párrafo que sigue a las etiquetas: separado como un párrafo nuevo. */
+  .tipos + :global(p) { margin-top: 1rem; }
+
+  @media (max-width: 819px) and (max-height: 740px) {
+    .tipos { gap: 0.3rem; margin-top: 0.7rem; }
+    .tipos li { padding: 0.25rem 0.7rem; }
+  }
+</style>

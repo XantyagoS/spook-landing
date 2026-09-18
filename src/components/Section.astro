@@ -8,24 +8,45 @@
  */
 interface Props {
   id?: string;
-  /** Nombre que el navbar muestra cuando esta sección ocupa la pantalla. */
+  /** Cómo se anuncia esta sección desde la anterior: es lo que dice el
+      fantasma para invitar a pasar a ella. */
   label?: string;
+  /** Qué dice el fantasma EN esta sección cuando no hay ninguna después que
+      anunciar. Solo tiene efecto en la última. */
+  cierre?: string;
+  /** Cómo se llama en el navbar mientras está en pantalla. Secciones
+      SEGUIDAS con el mismo nombre forman un grupo: el navbar pinta un punto
+      por cada una y marca en cuál vas. */
+  nombre?: string;
 }
-const { id, label } = Astro.props;
+const { id, label, cierre, nombre } = Astro.props;
 ---
 
-<section id={id} class="section" data-seccion={label}>
+<section id={id} class="section" data-seccion={label} data-cierre={cierre} data-nombre={nombre}>
   <div class="wrap">
     <slot />
   </div>
+  {/* El pie va DENTRO de la sección que lo lleva, no en el layout: así solo
+      aparece (y se desvanece) con ella. */}
+  {Astro.slots.has('pie') && (
+    <div class="al-pie"><slot name="pie" /></div>
+  )}
 </section>
 
 <style>
   .section {
+    position: relative;
     display: flex;
     align-items: center;
     min-height: calc(100dvh - var(--nav-h));
     padding-block: 3rem;
+  }
+
+  /* Pegado al fondo de la sección, a la altura del fantasma. */
+  .al-pie {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
   }
 
   /* Alineado a la izquierda, el contenido no puede arrancar en el borde de una

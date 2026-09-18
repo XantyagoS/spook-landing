@@ -4,6 +4,17 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Spook — Legal</title>
+<meta name="theme-color" content="#FFFFFF" />
+<script>
+/* El tema se resuelve ANTES de pintar, igual que en la landing (Base.astro):
+   misma clave de localStorage, así la elección se comparte entre páginas. */
+(function(){
+  var t; try{ t=localStorage.getItem('spook-theme'); }catch(e){}
+  if(t!=='light'&&t!=='dark'){ t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'; }
+  document.documentElement.dataset.theme=t;
+  var m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content',t==='dark'?'#111111':'#FFFFFF');
+})();
+</script>
 <link rel="icon" type="image/png" href="assets/landing/favicon.png" />
 <link rel="apple-touch-icon" href="assets/landing/apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -17,28 +28,70 @@
   --muted:#9A9A9A;
   --hairline:#EAEAEA;
   --accent:#C8FA3A;
-  --maxw:1080px;
-  --pad:clamp(20px,5vw,64px);
+  /* La columna del navbar de la landing: 900px útiles + el mismo margen. */
+  --pad:clamp(28px,7.5vw,64px);
+  --maxw:calc(900px + 2 * var(--pad));
+  --nav-h:64px;
+  /* Los grises del navbar, los mismos de la landing. */
+  --fg-2:#999999;
+  --fg-3:#AAAAAA;
+  --fg-4:#C0C0C0;
+  --card:#F7F7F7;
+}
+/* Modo oscuro: con los valores de la landing (colors.ts de la app). */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#111111;
+  --ink:#F5F5F5;
+  --ink-soft:#BDBDBD;
+  --muted:#888888;
+  --hairline:#2A2A2A;
+  --fg-2:#CCCCCC;
+  --fg-3:#888888;
+  --fg-4:#666666;
+  --card:#202020;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:"Hanken Grotesk",system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+body{font-family:"Hanken Grotesk",system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;transition:background-color .28s ease,color .28s ease}
 .mono{font-family:"Geist Mono",ui-monospace,monospace}
 a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
 ::selection{background:var(--accent);color:#0A0A0A}
 .wrap{max-width:var(--maxw);margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
 .lnk{box-shadow:inset 0 -.4em 0 var(--accent)}
+/* En oscuro el resaltado lima quedaría DEBAJO de texto claro y no se leería:
+   se reduce a un subrayado. */
+:root[data-theme="dark"] .lnk{box-shadow:inset 0 -2px 0 var(--accent)}
 
-/* header */
-.head{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);
-  backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);
-  border-bottom:1px solid var(--hairline)}
-.head .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:18px;letter-spacing:-.02em}
-.brand img{width:22px;height:auto}
-.back{font-size:14px;color:var(--muted);transition:color .15s;white-space:nowrap}
-.back:hover{color:var(--ink)}
+/* navbar: el mismo de la landing (src/components/Nav.astro). Si cambia allá,
+   cambiarlo aquí. Aquí ningún ítem está activo: todos llevan a su sección. */
+.bar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 78%,transparent);
+  backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);transition:background-color .28s ease}
+.bar .inner{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;min-height:var(--nav-h);
+  max-width:var(--maxw);margin-inline:auto;padding-inline:var(--pad)}
+.bar .brand{justify-self:start;white-space:nowrap;font-size:1.125rem;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
+.bar ul{display:flex;align-items:center;gap:.25rem;list-style:none}
+.bar .item{display:inline-flex;align-items:center;min-height:var(--nav-h);padding:0 .75rem;font-size:1rem;font-weight:400;
+  letter-spacing:-.01em;white-space:nowrap;color:var(--fg-3);transition:color .2s ease}
+.bar .item:hover{color:var(--fg-2)}
+.toggle{justify-self:end;display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;padding:0;border:0;
+  border-radius:999px;background:transparent;color:var(--ink);cursor:pointer;transition:background-color .2s ease,color .28s ease}
+.toggle:hover{background:var(--card)}
+.toggle svg{width:20px;height:20px;fill:currentColor}
+.toggle .sun{display:none}
+:root[data-theme="dark"] .toggle .moon{display:none}
+:root[data-theme="dark"] .toggle .sun{display:block}
+@media(max-width:640px){
+  .bar .inner{grid-template-columns:minmax(0,1fr) auto;column-gap:.5rem}
+  .bar .brand{display:none}
+  .bar nav{justify-self:start;min-width:0;max-width:100%;margin-left:-.45rem;overflow-x:auto;scrollbar-width:none}
+  .bar ul{gap:0}
+  .bar .item{padding-inline:.45rem;font-size:.875rem}
+  .toggle{width:40px;height:40px;margin-right:-.5rem}
+  .toggle svg{width:18px;height:18px}
+}
+@media(max-width:380px){ .bar .item{padding-inline:.35rem;font-size:.8125rem} }
 
 /* page head */
 .page-head{padding:clamp(44px,7vw,84px) 0 clamp(28px,4vw,44px);border-bottom:1px dashed var(--hairline)}
@@ -91,12 +144,6 @@ img{display:block;max-width:100%}
 .tbl td{padding:11px 16px 11px 0;border-bottom:1px dashed var(--hairline);vertical-align:top;color:var(--ink-soft)}
 .tbl td:first-child{color:var(--ink);font-weight:500;white-space:nowrap}
 
-/* footer */
-.foot{background:#000;color:#fff;padding:44px 0 52px}
-.foot .wrap{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
-.foot .brand img{filter:invert(1)}
-.foot-legal{font-family:"Geist Mono",monospace;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:#5a5a5a}
-
 @media(max-width:780px){
   .layout{grid-template-columns:1fr;gap:36px}
   .toc{position:static;flex-direction:row;flex-wrap:wrap;gap:18px 28px;padding-bottom:8px;border-bottom:1px dashed var(--hairline)}
@@ -104,7 +151,7 @@ img{display:block;max-width:100%}
   .tbl td:first-child{white-space:normal}
 }
 @media print{
-  .head,.toc,.foot{display:none}
+  .bar,.toc{display:none}
   .layout{grid-template-columns:1fr}
   body{font-size:12pt}
 }
@@ -112,10 +159,26 @@ img{display:block;max-width:100%}
 </head>
 <body>
 
-<header class="head">
-  <div class="wrap">
-    <a class="brand" href="index.html"><img src="assets/landing/logo-mark.png" alt="Spook" /><span>Spook</span></a>
-    <a class="back" href="index.html">← Volver a Spook</a>
+<header class="bar">
+  <div class="inner">
+    <a class="brand" href="/">Spook AI</a>
+    <nav aria-label="Secciones">
+      <ul>
+        <li><a class="item" href="/">Inicio</a></li>
+        <li><a class="item" href="/#que-es">Qué es</a></li>
+        <li><a class="item" href="/#como-funciona">Cómo funciona</a></li>
+        <li><a class="item" href="/#descargar">Descarga</a></li>
+      </ul>
+    </nav>
+    <button id="theme-toggle" class="toggle" type="button" aria-label="Cambiar de tema">
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+      </svg>
+    </button>
   </div>
 </header>
 
@@ -352,12 +415,22 @@ img{display:block;max-width:100%}
   </main>
 </div>
 
-<footer class="foot">
-  <div class="wrap">
-    <a class="brand" href="index.html"><img src="assets/landing/logo-mark.png" alt="Spook" /><span>Spook</span></a>
-    <span class="foot-legal">© 2026 Spook · Hecho en Colombia</span>
-  </div>
-</footer>
+<script>
+/* El botón de tema: el mismo comportamiento que en la landing. */
+(function(){
+  var root=document.documentElement, b=document.getElementById('theme-toggle');
+  function paint(t){
+    root.dataset.theme=t;
+    b.setAttribute('aria-label',t==='dark'?'Cambiar a tema claro':'Cambiar a tema oscuro');
+    var m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content',t==='dark'?'#111111':'#FFFFFF');
+  }
+  paint(root.dataset.theme||'light');
+  b.addEventListener('click',function(){
+    paint(root.dataset.theme==='dark'?'light':'dark');
+    try{ localStorage.setItem('spook-theme',root.dataset.theme); }catch(e){}
+  });
+})();
+</script>
 
 </body>
 </html>

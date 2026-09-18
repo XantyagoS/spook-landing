@@ -1,0 +1,36 @@
+---
+/**
+ * Qué es Spook: la primera pantalla después de la portada.
+ *
+ * El texto es el del usuario (vivía en Descarga). En el teléfono, el splash
+ * de la app (spook-frontend/assets/splash.png).
+ */
+import Split from './Split.astro';
+---
+
+<Split
+  id="que-es"
+  label="¿Qué es Spook?"
+  nombre="Qué es"
+  src="/assets/landing/iphone.png"
+  alt=""
+  width={389}
+  height={800}
+  pantalla={{
+    imagenes: [{ src: '/assets/landing/splash.png', alt: 'La pantalla de inicio de Spook: el fantasma' }],
+    /* Como en la app: fondo blanco en los dos temas (app.json → splash). */
+    fondo: '#FFFFFF',
+    /* En iOS el logo va en una caja de 200pt sobre una pantalla de 393pt. */
+    ancho: 50.9,
+  }}
+>
+  <h2>Qué es</h2>
+  <p>
+    Spook AI — nace para mejorar tu relación con el dinero: que te sientas
+    cómodo con tus gastos y que cumplas las metas que te propones.
+  </p>
+  <p>
+    No somos un control de gastos. Somos el soporte que respalda tus
+    decisiones.
+  </p>
+</Split>

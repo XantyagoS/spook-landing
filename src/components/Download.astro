@@ -1,88 +1,67 @@
 ---
 /**
- * Segunda sección: descargar. El texto a la izquierda, la app a la derecha.
+ * Descarga: el llamado y los dos botones a las tiendas. Es la ÚLTIMA
+ * sección, y por eso lleva el pie. (Su texto de «por qué Spook» se mudó a
+ * Qué es.)
  *
- * TEXTO DE RELLENO, a la espera del definitivo.
+ * La disposición (texto + teléfono) y la animación de entrada vienen de
+ * Split.astro. Aquí solo vive lo propio de esta sección: el signo en lima y
+ * los botones.
  */
-import Section from './Section.astro';
+import Split from './Split.astro';
+import Footer from './Footer.astro';
 ---
 
-<Section id="descargar" label="Descargar">
-  <div class="split">
-    <div class="copy">
-      <h2>Lorem ipsum</h2>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
-      </p>
+<Split
+  id="descargar"
+  label="¡Descárgala ya!"
+  nombre="Descarga"
+  src="/assets/landing/iphone.png"
+  alt=""
+  width={389}
+  height={800}
+  pantalla={{
+    imagenes: [
+      { src: '/assets/landing/descarga-inicio.webp', alt: 'Spook instalada en la pantalla de inicio de un iPhone' },
+    ],
+    fondo: '#FFFFFF',
+  }}
+>
+  <h2>Descárgala ya<span class="signo">!</span></h2>
+  <p>
+    ¿Qué esperas para empezar a registrar tus gastos y mejorar tu relación con
+    el dinero?
+  </p>
+    <div class="actions">
+      <a class="btn ink" data-descarga href="https://apps.apple.com/app/id6772789512" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M16.4 12.7c0-2 1.6-2.9 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7-.6 0-1.6-.7-2.6-.7-1.3 0-2.6.8-3.2 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.4 2 1 0 1.3-.6 2.5-.6s1.5.6 2.5.6 1.7-.9 2.3-1.9c.7-1.1 1-2.2 1-2.2s-1.9-.8-1.9-2.9zM14.5 6.3c.5-.7.9-1.6.8-2.5-.8 0-1.7.5-2.3 1.2-.5.6-1 1.5-.8 2.4.9 0 1.7-.5 2.3-1.1z" />
+        </svg>
+        App Store
+      </a>
 
-      <div class="actions">
-        <a class="btn ink" href="https://apps.apple.com/app/id6772789512" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M16.4 12.7c0-2 1.6-2.9 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7-.6 0-1.6-.7-2.6-.7-1.3 0-2.6.8-3.2 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.4 2 1 0 1.3-.6 2.5-.6s1.5.6 2.5.6 1.7-.9 2.3-1.9c.7-1.1 1-2.2 1-2.2s-1.9-.8-1.9-2.9zM14.5 6.3c.5-.7.9-1.6.8-2.5-.8 0-1.7.5-2.3 1.2-.5.6-1 1.5-.8 2.4.9 0 1.7-.5 2.3-1.1z" />
-          </svg>
-          App Store
-        </a>
-
-        <a class="btn accent" href="https://play.google.com/store/apps/details?id=co.spook.app" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M3.6 1.9a1.4 1.4 0 0 0-.6 1.2v17.8c0 .5.2.9.6 1.2l9.4-10.1L3.6 1.9z" />
-            <path d="M16.7 8.6 5.2 1.5a1.3 1.3 0 0 0-1.6.4l9.4 10.1 3.7-3.4z" />
-            <path d="M13 12l-9.4 10.1c.4.4 1.1.5 1.6.2l11.5-7.1L13 12z" />
-            <path d="M20.4 10.7 17.4 9l-4 3 4 3 3-1.7c1-.6 1-2 0-2.6z" />
-          </svg>
-          Google Play
-        </a>
-      </div>
+      <a class="btn accent" data-descarga href="https://play.google.com/store/apps/details?id=co.spook.app" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M3.6 1.9a1.4 1.4 0 0 0-.6 1.2v17.8c0 .5.2.9.6 1.2l9.4-10.1L3.6 1.9z" />
+          <path d="M16.7 8.6 5.2 1.5a1.3 1.3 0 0 0-1.6.4l9.4 10.1 3.7-3.4z" />
+          <path d="M13 12l-9.4 10.1c.4.4 1.1.5 1.6.2l11.5-7.1L13 12z" />
+          <path d="M20.4 10.7 17.4 9l-4 3 4 3 3-1.7c1-.6 1-2 0-2.6z" />
+        </svg>
+        Google Play
+      </a>
     </div>
 
-    <div class="shot">
-      <img
-        src="/assets/landing/login.png"
-        alt="Pantalla de inicio de sesión de Spook"
-        width="760"
-        height="1652"
-        loading="lazy"
-        decoding="async"
-      />
-    </div>
-  </div>
-</Section>
+  <Footer slot="pie" />
+</Split>
 
 <style>
-  .split {
-    display: grid;
-    gap: clamp(2.5rem, 6vw, 4rem);
-    align-items: center;
-  }
-
-  h2 {
-    margin: 0;
-    font-size: var(--type-title);
-    font-weight: 900;
-    /* En caja baja, tal como se escribe. A diferencia de la frase del hero,
-       esta no va en versales. */
-    line-height: 0.92;
-    /* Y en caja baja el peso 900 admite más tracking negativo que en versales
-       (ahí las letras se tocarían). */
-    letter-spacing: -0.03em;
-    color: var(--fg);
+  /* El signo va en el acento. Es decoración, no texto que haya que leer: el
+     título se entiende igual sin él, así que el bajo contraste del lima sobre
+     blanco aquí no estorba. */
+  .signo {
+    color: var(--accent);
     transition: color 0.28s ease;
   }
-
-  p {
-    max-width: 38ch;
-    /* El hueco se mide contra el título, no contra la raíz: si el título
-       cambia de tamaño, la distancia lo acompaña. */
-    margin: 0.7em 0 0;
-    font-size: var(--type-body);
-    line-height: 1.5;
-    color: var(--fg);
-    transition: color 0.28s ease;
-  }
-
-  /* --------------------------------------------------------------- botones -- */
 
   .actions {
     display: flex;
@@ -101,7 +80,7 @@ import Section from './Section.astro';
     padding: 0 1.5rem;
     border-radius: 999px;
     font-size: var(--type-small);
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: -0.01em;
     text-decoration: none;
     white-space: nowrap;
@@ -134,32 +113,4 @@ import Section from './Section.astro';
     color: var(--on-accent);
   }
   .btn.accent:hover { filter: brightness(1.06); }
-
-  .shot {
-    display: flex;
-    justify-content: center;
-  }
-
-  .shot img {
-    display: block;
-    width: auto;
-    /* Se mide por ALTO y no por ancho: así la captura nunca desborda la
-       pantalla de la sección, sea cual sea la proporción de la ventana. */
-    height: min(52dvh, 560px);
-    border-radius: 1.75rem;
-    border: 1px solid var(--line);
-    transition: border-color 0.28s ease;
-  }
-
-  /* En pantalla ancha, uno al lado del otro. Debajo de eso se apilan: una
-     captura de teléfono al lado de un texto no cabe en un teléfono. */
-  @media (min-width: 820px) {
-    .split {
-      grid-template-columns: 1fr auto;
-      gap: clamp(3rem, 8vw, 7rem);
-    }
-    .shot img {
-      height: min(72dvh, 720px);
-    }
-  }
 </style>

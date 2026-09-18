@@ -39,26 +39,36 @@
   color-scheme: light;
 
   /* Alto del navbar. Vive aquí porque las secciones lo descuentan de la altura
-     de pantalla: si el número se escribe a mano en varios sitios, cambiar uno
-     sin los otros descuadra el resto. */
+     de pantalla. */
   --nav-h: 64px;
 
-  /* La columna de contenido. Estos dos valores salen de legal.html, para que
-     las dos páginas compartan margen: el padding va DENTRO del ancho máximo,
-     no fuera — con el padding fuera, a 1440px el texto arrancaba 114px más a
-     la izquierda que en legal. */
-  --col-max: 1080px;
-  --col-pad: clamp(20px, 5vw, 64px);
+  /* Dos columnas centradas, con el mismo margen lateral: la del navbar,
+     de 900px útiles, y la del contenido, más angosta, de 800px. El padding
+     va dentro del ancho máximo. El margen parte de 28px: con 20px, en el
+     teléfono el texto quedaba pegado al borde. */
+  --col-pad: clamp(28px, 7.5vw, 64px);
+  --nav-max: calc(900px + 2 * var(--col-pad));
+  --col-max: calc(800px + 2 * var(--col-pad));
 
   /* Escala tipográfica. Todo se mide contra el lado MÁS CORTO de la ventana:
      en una pantalla ancha y baja, un tamaño en vw solo desborda el alto.
 
-     El techo de --type-display lo pone la línea más larga de la frase del
-     hero, "TE LLEVAS MEJOR", que mide 8.21em en versales peso 900. */
-  --type-display: clamp(2.25rem, min(16vw, 11.8vh), 8rem);
-  --type-title:   clamp(1.5rem, min(6vw, 6.5vh), 3.25rem);
-  --type-body:    clamp(1rem, 4.1vw, 1.375rem);
-  --type-small:   clamp(0.9375rem, 3.6vw, 1.0625rem);
+     El 13.5vw de --type-display lo pone la línea más ancha del hero en
+     teléfono, «SPOOK AI —», que mide ~5.6em en versales peso 700, contra
+     una columna que es el ancho menos ~15vw de margen. (En escritorio el
+     hero fija su propio tamaño.) */
+  --type-display: clamp(2.25rem, min(13.5vw, 11.8vh), 8rem);
+  /* Título, texto y detalle: la escala de legal.html (el título de página
+     de allá, 32–52px; su texto, 15,5px; sus datos, 14,5px). Fijos y no
+     proporcionales: a ese tamaño ya se leen bien en cualquier pantalla. */
+  --type-title:   clamp(2rem, min(5vw, 6.5vh), 3.25rem);
+  --type-body:    0.96875rem;
+  --type-small:   0.90625rem;
+
+  /* El fantasma fijo de abajo: su tamaño y su distancia al borde. Viven aquí
+     porque el pie se alinea con él. */
+  --fantasma:        clamp(3rem, calc(9.5vw + 2px), 3.75rem);
+  --fantasma-bottom: 1.25rem;
 
   --bg:        #FFFFFF;  /* background        */
   --surface:   #FAFAFA;  /* surface           */

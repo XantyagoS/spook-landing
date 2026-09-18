@@ -34,6 +34,17 @@ const scrolls = arg('scroll', '0').split(',').map(Number);
 // Por defecto Chrome oculta la barra de scroll, lo que hace imposible
 // comprobar si la CSS la oculta de verdad. Con --scrollbars se deja visible.
 const showScrollbars = argv.includes('--scrollbars');
+// JS a ejecutar justo antes de fotografiar. Sirve para congelar una animación
+// en un instante concreto: una captura estática no puede pillar un parpadeo.
+const preJs = arg('js', null);
+// Selector sobre el que dejar el puntero antes de fotografiar. Un `mouseover`
+// lanzado desde JavaScript NO activa `:hover` de CSS: hace falta un evento de
+// ratón real, y eso solo lo puede mandar el protocolo de depuración.
+const hoverSel = arg('hover', null);
+// Rueda REAL por el protocolo de depuración. Un `new WheelEvent` disparado
+// desde JS activa los listeners pero no pasa por la maquinaria de scroll del
+// navegador: no sirve para reproducir lo que hace un trackpad.
+const wheelDelta = arg('wheel', null);
 const port = 9333 + Math.floor(Math.random() * 400);
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -119,6 +130,22 @@ if (theme) {
 
 await send('Page.navigate', { url });
 await sleep(1800); // tipografías + animaciones de entrada
+
+// El estado y el puntero se preparan en AMBOS modos: si solo se hicieran
+// antes de fotografiar, una medición con --eval no vería el hover.
+if (preJs) await evaluate(preJs);
+
+if (hoverSel) {
+  const punto = await evaluate(
+    `(() => { const e = document.querySelector(${JSON.stringify(hoverSel)});
+      if (!e) return null; const r = e.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`,
+  );
+  if (punto) {
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: punto.x, y: punto.y });
+    await sleep(400);
+  }
+}
 
 if (evalExpr) {
   console.log(JSON.stringify(await evaluate(evalExpr), null, 2));

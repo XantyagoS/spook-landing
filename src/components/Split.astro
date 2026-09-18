@@ -1,0 +1,242 @@
+---
+/**
+ * Sección de texto con un teléfono al lado.
+ *
+ * La comparten Descarga y Cómo funciona. Existe para no duplicar dos cosas que
+ * costó ajustar: la disposición (captura arriba en móvil, a la derecha en
+ * escritorio) y la fórmula del tamaño de la captura.
+ *
+ * El texto llega por el slot. OJO: el contenido de un slot conserva el ámbito
+ * de estilos del componente que lo ESCRIBE, no de este. Por eso aquí se le da
+ * estilo con `.copy :global(...)` — sin el `:global`, estas reglas no
+ * alcanzarían al <h2> ni a los <p> que manda el padre.
+ */
+import Section from './Section.astro';
+
+interface Props {
+  id: string;
+  /** Cómo se anuncia esta sección desde la anterior (lo dice el fantasma). */
+  label?: string;
+  /** Qué dice el fantasma en esta sección si es la última. */
+  cierre?: string;
+  /** Nombre en el navbar (ver Section: los nombres repetidos agrupan). */
+  nombre?: string;
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  /** Lo que se ve DENTRO de la pantalla del teléfono, detrás del marco. Con
+      varias imágenes, se van pasando solas cada 3s mientras la sección está
+      en pantalla. */
+  pantalla?: {
+    imagenes: { src: string; alt: string }[];
+    /** Fondo de la pantalla (lo que la imagen no cubre). */
+    fondo: string;
+    /** Ancho de la imagen respecto al de la pantalla, en %, centrada. Sin él,
+        la imagen llena la pantalla entera (una captura). */
+    ancho?: number;
+  };
+}
+
+const { id, label, cierre, nombre, src, alt, width, height, pantalla } = Astro.props;
+---
+
+<Section id={id} label={label} cierre={cierre} nombre={nombre}>
+  <div class="split">
+    <div class="copy">
+      <slot />
+    </div>
+    <div class="shot">
+      <div class="telefono">
+        {pantalla && (
+          <div
+            class:list={['pantalla', { llena: !pantalla.ancho }]}
+            style={`background:${pantalla.fondo}`}
+            data-pantalla={pantalla.imagenes.length > 1 ? '' : undefined}
+          >
+            {pantalla.imagenes.map(({ src, alt }, i) => (
+              <img
+                src={src}
+                alt={alt}
+                style={pantalla.ancho ? `width:${pantalla.ancho}%` : undefined}
+                data-actual={i === 0 ? '' : undefined}
+                aria-hidden={i === 0 ? undefined : 'true'}
+                decoding="async"
+              />
+            ))}
+          </div>
+        )}
+        <img class="marco" src={src} alt={alt} width={width} height={height} loading="lazy" decoding="async" />
+      </div>
+    </div>
+  </div>
+  <slot name="pie" slot="pie" />
+</Section>
+
+<script>
+  // Las pantallas con varias imágenes las pasan solas cada 3s, pero SOLO
+  // mientras su sección es la activa. Al volver a ella se empieza por la
+  // primera: la secuencia se lee de principio a fin cada vez.
+  const PASO_MS = 3000;
+  document.querySelectorAll<HTMLElement>('[data-pantalla]').forEach((pantalla) => {
+    const seccion = pantalla.closest('section');
+    const imgs = [...pantalla.querySelectorAll('img')];
+    let i = 0;
+    let reloj: number | undefined;
+
+    const mostrar = (n: number) => {
+      i = n;
+      imgs.forEach((img, k) => {
+        img.toggleAttribute('data-actual', k === i);
+        img.toggleAttribute('aria-hidden', k !== i);
+      });
+    };
+
+    const sincronizar = () => {
+      window.clearInterval(reloj);
+      mostrar(0);
+      if (seccion?.hasAttribute('data-activa')) {
+        reloj = window.setInterval(() => mostrar((i + 1) % imgs.length), PASO_MS);
+      }
+    };
+
+    if (seccion) {
+      new MutationObserver(sincronizar).observe(seccion, { attributes: true, attributeFilter: ['data-activa'] });
+    }
+    sincronizar();
+  });
+</script>
+
+<style>
+  .split {
+    display: grid;
+    gap: clamp(2rem, 6vw, 4rem);
+    align-items: center;
+  }
+
+  /* ------------------------------------------------------------- texto -- */
+
+  .copy :global(h2) {
+    margin: 0;
+    font-size: var(--type-title);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--fg);
+    transition: color 0.28s ease;
+  }
+
+  .copy :global(p) {
+    max-width: 52ch;
+    margin: 0.9rem 0 0;
+    font-size: var(--type-body);
+    line-height: 1.6;
+    color: var(--fg);
+    transition: color 0.28s ease;
+  }
+
+  /* Un párrafo que sigue a otro respira más: así un remate queda aparte sin
+     necesitar una clase propia. */
+  .copy :global(p + p) {
+    margin-top: 1em;
+  }
+
+  /* ----------------------------------------------------------- captura -- */
+  /* La imagen trae su propio marco de teléfono (con esquinas y pantalla
+     transparentes), así que aquí no lleva borde ni radio. */
+
+  .shot {
+    display: flex;
+    justify-content: center;
+    /* Apilados, la captura va ARRIBA y el texto debajo: se ve antes de qué se
+       habla. En escritorio vuelve a su orden natural. El marcado mantiene el
+       orden lógico (texto primero) para lectores de pantalla. */
+    order: -1;
+  }
+
+  .marco {
+    display: block;
+    width: auto;
+    /* Se mide por ALTO y no por ancho: así nunca desborda la pantalla. Crece
+       con el alto de la ventana, porque el texto no crece:
+         667px → ~130px    844px → ~210px    932px → ~250px */
+    height: clamp(120px, calc(45dvh - 170px), 260px);
+  }
+  /* Teléfonos bajos (un SE): el título ya no encoge por debajo de 32px, así
+     que el alto sale del teléfono. */
+  @media (max-width: 819px) and (max-height: 740px) {
+    .marco { height: 96px; }
+  }
+
+  /* El marco va ENCIMA de la pantalla: su hueco es transparente, así que lo
+     de debajo se ve a través, y el marco tapa los bordes y la isla. */
+  .telefono { position: relative; }
+  .marco { position: relative; z-index: 1; }
+
+  /* El hueco de la pantalla dentro de iphone.png (389×800), medido en píxeles:
+     x 18–371, y 14–785, con esquinas de ~45px de radio. En porcentajes, para
+     que siga al marco a cualquier tamaño. Si cambia el marco, re-medir. */
+  .pantalla {
+    position: absolute;
+    left: 4.6%;
+    right: 4.4%;
+    top: 1.75%;
+    bottom: 1.75%;
+    display: grid;
+    place-items: center;
+    border-radius: 12.7% / 5.8%;
+    overflow: hidden;
+  }
+  /* Todas las imágenes apiladas en la misma celda; solo la actual se ve, y el
+     cambio es un fundido. */
+  .pantalla img {
+    grid-area: 1 / 1;
+    display: block;
+    height: auto;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .pantalla img[data-actual] { opacity: 1; }
+  .pantalla.llena { place-items: stretch; }
+  .pantalla.llena img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+
+  @media (min-width: 820px) {
+    .split {
+      grid-template-columns: 1fr auto;
+      gap: clamp(3rem, 8vw, 7rem);
+    }
+    .shot { order: 0; }
+    .marco { height: min(52dvh, 460px); }
+  }
+
+  /* ------------------------------------------------------------ entrada -- */
+  /* La animación solo existe mientras la sección está activa: ese quitar y
+     poner es lo que la repite en cada vuelta. No nombra posiciones.
+
+     El texto se anima por HIJO DIRECTO de `.copy`, sea lo que sea — título,
+     párrafo o fila de botones — así que cada sección escalona lo suyo sin
+     declarar nada. */
+  :global(section[data-activa]) .shot,
+  :global(section[data-activa]) .copy > :global(*) {
+    animation: surgir 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* El escalonado sigue el orden en que se LEE: en móvil la captura está
+     arriba, así que entra primero. */
+  :global(section[data-activa]) .shot { animation-delay: 0ms; }
+  :global(section[data-activa]) .copy > :global(:nth-child(1)) { animation-delay: 90ms; }
+  :global(section[data-activa]) .copy > :global(:nth-child(2)) { animation-delay: 160ms; }
+  :global(section[data-activa]) .copy > :global(:nth-child(3)) { animation-delay: 220ms; }
+  :global(section[data-activa]) .copy > :global(:nth-child(4)) { animation-delay: 300ms; }
+  :global(section[data-activa]) .copy > :global(:nth-child(5)) { animation-delay: 360ms; }
+
+  @keyframes surgir {
+    from { opacity: 0; translate: 0 1.25rem; }
+    to   { opacity: 1; translate: 0 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(section[data-activa]) .shot,
+    :global(section[data-activa]) .copy > :global(*) { animation: none; }
+  }
+</style>

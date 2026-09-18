@@ -7,15 +7,26 @@
  * filtro en modo oscuro, que es un apaño y se ve peor.
  *
  * Origen: marketing/brand/Spook.svg
+ *
+ * Son tres paths: el cuerpo y un ojo cada uno. Por eso los ojos se pueden
+ * animar por separado — si algún día se re-traza el logo, comprobar que sigan
+ * siendo piezas independientes o el parpadeo dejará de funcionar.
+ *
+ * Las cejas NO son del logo: se añadieron aquí, en coordenadas del lienzo
+ * (1024), sobre cada ojo. Están ocultas; las enciende quien use el logo
+ * (Fantasma, en Cómo funciona). Van con clase propia — igual que los ojos —
+ * porque un selector por posición (`path:nth-of-type`) las confundiría.
  */
 interface Props {
   class?: string;
+  /** Da vida a los ojos: parpadean y miran hacia arriba cada pocos segundos. */
+  vivo?: boolean;
 }
-const { class: className } = Astro.props;
+const { class: className, vivo = false } = Astro.props;
 ---
 
 <svg
-  class={className}
+  class:list={[className, { vivo }]}
   viewBox="0 0 1024.000000 1024.000000"
   fill="currentColor"
   role="img"
@@ -38,18 +49,22 @@ c-32 30 -177 173 -323 317 -146 145 -272 263 -279 263 -7 0 -112 -98 -234
 -287 -269 -8 -2 -156 135 -330 305 -174 169 -322 308 -330 308 -7 0 -156 -139
 -330 -310 -174 -170 -321 -311 -325 -313 -5 -2 -9 970 -9 2202 l0 2206 1980 0
 1980 0 0 -2207z"/>
-<path d="M4140 6378 c-129 -45 -229 -132 -285 -247 -54 -109 -55 -117 -55
+<path class="ojo izq" d="M4140 6378 c-129 -45 -229 -132 -285 -247 -54 -109 -55 -117 -55
 -651 0 -450 2 -502 18 -561 24 -88 63 -152 132 -219 103 -101 222 -145 370
 -138 137 8 243 57 338 157 91 97 131 200 135 347 l2 99 -75 6 c-124 10 -212
 42 -311 117 -61 45 -113 115 -104 141 11 37 111 126 180 163 85 44 153 65 242
 73 l68 7 -3 172 c-5 192 -14 230 -81 332 -52 81 -115 135 -207 180 -74 36 -86
 38 -189 41 -95 3 -119 0 -175 -19z"/>
-<path d="M5800 6381 c-74 -24 -107 -42 -172 -95 -67 -54 -123 -136 -154 -225
+<path class="ojo der" d="M5800 6381 c-74 -24 -107 -42 -172 -95 -67 -54 -123 -136 -154 -225
 -24 -66 -24 -67 -24 -581 l0 -515 24 -68 c44 -125 117 -212 231 -277 111 -64
 276 -79 395 -36 85 30 122 53 192 122 105 103 145 200 150 364 l3 95 -80 7
 c-145 12 -267 70 -361 171 -30 32 -54 64 -54 71 0 23 92 118 154 157 79 52
 149 76 256 91 l90 12 0 110 c-1 165 -14 249 -55 334 -60 127 -160 214 -301
 262 -75 26 -216 26 -294 1z"/>
+</g>
+<g class="cejas" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round">
+<path class="ceja izq" d="M378 352 Q417 318 456 352"/>
+<path class="ceja der" d="M549 352 Q588 318 627 352"/>
 </g></svg>
 
 <style>
@@ -57,5 +72,99 @@ c-145 12 -267 70 -361 171 -30 32 -54 64 -54 71 0 23 92 118 154 157 79 52
     display: block;
     width: 100%;
     height: auto;
+  }
+
+  /* `transform-box: fill-box` es imprescindible: sin él el origen se calcula
+     desde el lienzo entero de 1024 y los ojos salen disparados fuera del
+     fantasma en vez de moverse sobre sí mismos. */
+  /* El balanceo de cabeza NO es parte del reposo: solo aparece cuando algo
+     enciende `--sonrisa`. En reposo el fantasma solo parpadea y mira de lado.
+     Pivota abajo, como una cabeza sobre un cuello, no en su centro.
+
+     El truco de la duración: CSS no permite encender una animación desde una
+     variable, pero sí usarla como duración — y una duración de cero es una
+     animación que no llega a correr. Con `--sonrisa: 0` la cabeza está quieta
+     sin necesidad de una clase aparte. */
+  .vivo {
+    transform-origin: 50% 85%;
+    animation: cabeza calc(var(--sonrisa, 0) * 900ms) ease-in-out infinite;
+  }
+
+  @keyframes cabeza {
+    0%, 100% { rotate: -5deg; }
+    50%      { rotate: 5deg; }
+  }
+
+  .ceja {
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .vivo .ojo {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ojos 14s ease-in-out infinite;
+
+    /* LA SONRISA. No puede ir en `transform` porque ahí manda la animación de
+       los ojos y la pisaría. `rotate`, `scale` y `translate` son propiedades
+       independientes que se COMPONEN con `transform`, así que la sonrisa se
+       superpone al parpadeo y al vistazo sin pelearse con ellos.
+       Llega por una variable heredada: el logo solo expone la perilla y no
+       sabe qué la acciona. */
+    rotate: calc(var(--sonrisa, 0) * var(--lado, 0) * 10deg);
+    scale: 1 calc(1 - 0.55 * var(--sonrisa, 0));
+    /* SIN desplazamiento vertical, y es a propósito. Medido: con el origen en
+       el centro, este `scale` ya cierra el ojo casi solo por abajo — el borde
+       superior se mueve 0.2px y el inferior 1.9px. Añadirle compensación lo
+       subía entero y volvía a cerrarse por arriba, que es justo lo que no se
+       quiere: el párpado de arriba se queda donde está. */
+    transition: rotate 260ms ease, scale 260ms ease, translate 260ms ease;
+  }
+
+  /* Cada ojo se inclina hacia su lado, para que el gesto sea simétrico. */
+  .vivo .ojo.izq { --lado: -1; }
+  .vivo .ojo.der { --lado: 1; }
+
+  /* Todos los gestos van en un solo bloque de fotogramas porque animan la
+     misma propiedad (`transform`), y dos animaciones sobre ella se pisan: la
+     última gana entera.
+
+     Los parpadeos ALTERNAN metiendo los dos tipos en el mismo ciclo, separados
+     — con CSS el ciclo se repite idéntico, así que la variedad hay que
+     escribirla dentro. El ciclo es largo (14s) justamente para que la
+     repetición no cante.
+
+     Reparto:
+        7 –  9,2%   parpadeo simple
+       26 – 56%     vistazo a un lado, cruce al otro, vuelta al centro
+       68 – 72,6%   parpadeo doble
+       72,6 – 100%  quieto (3,8s de reposo antes de volver a empezar)
+
+     El `ease-in-out` por defecto se aplica a CADA tramo, no al ciclo entero:
+     por eso cada movimiento arranca y frena suave. Y entre el ir y el venir
+     del vistazo hay pausas de ~1s en las que se queda mirando — sin ellas
+     sería un vaivén mecánico.
+
+     El desplazamiento es en porcentaje del propio ojo, que es una barra
+     estrecha: el 50% son ~1,2px con el fantasma a 28px. Un vistazo, no un
+     giro de cabeza. */
+  @keyframes ojos {
+    0%, 7%       { transform: translateX(0) scaleY(1); }
+
+    /* parpadeo simple */
+    8%           { transform: translateX(0) scaleY(0.06); }
+    9.2%, 26%    { transform: translateX(0) scaleY(1); }
+
+    /* vistazo de lado a lado */
+    31%, 38%     { transform: translateX(-50%) scaleY(1); }
+    44%, 51%     { transform: translateX(50%) scaleY(1); }
+    56%, 68%     { transform: translateX(0) scaleY(1); }
+
+    /* parpadeo doble */
+    69%          { transform: translateX(0) scaleY(0.06); }
+    70.2%        { transform: translateX(0) scaleY(1); }
+    71.4%        { transform: translateX(0) scaleY(0.06); }
+    72.6%, 100%  { transform: translateX(0) scaleY(1); }
   }
 </style>

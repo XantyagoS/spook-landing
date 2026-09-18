@@ -1,7 +1,7 @@
 ---
 /**
- * Pie de página: solo lo legal. Centrado, sobre la misma columna que el
- * navbar y las secciones.
+ * Pie de página: solo lo legal. Va en la última sección, al fondo, donde el
+ * fantasma se retira: ocupa su sitio y su altura.
  */
 const path = Astro.url.pathname;
 const enLegal = path.startsWith('/legal');
@@ -25,9 +25,10 @@ const links = [
 </footer>
 
 <style>
+  /* El centro de los enlaces (44px de alto) cae en el centro del fantasma. */
   .pie {
     padding-inline: var(--col-pad);
-    padding-block: 2.5rem 3rem;
+    padding-bottom: calc(var(--fantasma-bottom) + var(--fantasma) / 2 - 22px);
   }
 
   /* La misma columna que el navbar y las secciones. */
@@ -52,7 +53,7 @@ const links = [
     /* 44px de alto mínimo: por debajo deja de ser cómodo con el dedo. */
     min-height: 44px;
     font-size: var(--type-small);
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: -0.01em;
     text-decoration: none;
     /* El mismo gris callado que los enlaces inactivos del navbar. */

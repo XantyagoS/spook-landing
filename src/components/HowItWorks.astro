@@ -1,0 +1,55 @@
+---
+/**
+ * Cómo funciona: las tres formas de registrar un gasto, con el teléfono al
+ * lado.
+ *
+ * Los textos son un BORRADOR (describen lo que la app hace de verdad, pero el
+ * copy lo escribe el usuario). En el teléfono, capturas reales de la app
+ * (menú, manual, voz, foto) que se pasan solas.
+ */
+import Split from './Split.astro';
+import Items from './Items.astro';
+
+// El orden es el que pidió el usuario: manual, voz, foto.
+const formas = [
+  {
+    nombre: 'Manual',
+    detalle: 'Escríbelo en segundos.',
+    icono: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  },
+  {
+    nombre: 'Voz',
+    detalle: 'Dilo en voz alta.',
+    icono: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/>',
+  },
+  {
+    nombre: 'Foto',
+    detalle: 'Fotografía la factura.',
+    icono: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z"/><circle cx="12" cy="13" r="3"/>',
+  },
+];
+---
+
+<Split
+  id="como-funciona"
+  label="Mira cómo funciona"
+  nombre="Cómo funciona"
+  src="/assets/landing/iphone.png"
+  alt=""
+  width={389}
+  height={800}
+  pantalla={{
+    /* El recorrido de registrar un gasto: el menú y las tres formas. */
+    imagenes: [
+      { src: '/assets/landing/registro-menu.webp', alt: 'El menú para registrar un gasto: Manual, Voz o Foto' },
+      { src: '/assets/landing/registro-manual.webp', alt: 'El registro manual: monto, comercio, fecha, categoría y etiquetas' },
+      { src: '/assets/landing/registro-voz.webp', alt: 'La captura por voz: «Dime qué compraste, dónde y cuánto»' },
+      { src: '/assets/landing/registro-foto.webp', alt: 'La captura por foto: centra el gasto dentro del marco' },
+    ],
+    fondo: '#FFFFFF',
+  }}
+>
+  <h2>Cómo funciona</h2>
+  <p>Registra tus ingresos o gastos de diferentes maneras.</p>
+  <Items items={formas} />
+</Split>

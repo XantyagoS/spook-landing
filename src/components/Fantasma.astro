@@ -1,0 +1,565 @@
+---
+/**
+ * El fantasma: el único control de la página y lo único que no cambia.
+ *
+ * Está FIJO a la ventana, fuera de las secciones, porque las secciones se
+ * sustituyen unas a otras y él tiene que sobrevivir a ese relevo.
+ *
+ * Al pulsarlo implosiona, y mientras no se ve nada la escena cambia de paso.
+ * El cambio va escondido dentro de la implosión a propósito: si se hiciera
+ * antes, se vería el corte.
+ */
+import Logo from './Logo.astro';
+---
+
+<button class="bajar" type="button" aria-label="Siguiente" data-fantasma>
+  {/* El anuncio: cada poco dice cómo se llama la sección siguiente. El texto no
+      está escrito aquí — lo pone el script leyendo el `label` de esa sección,
+      así que al añadir o reordenar secciones se actualiza solo. */}
+  <span class="anuncio" data-anuncio hidden>
+    <span data-anuncio-texto></span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  </span>
+
+  <span class="glifo"><Logo vivo /></span>
+
+  {/* Las chispas se generan en el servidor: cuatro elementos fijos, cada uno
+      con su ángulo en una variable. */}
+  {Array.from({ length: 4 }, (_, i) => (
+    <span class="chispa" style={`--angulo:${i * 90}deg`} aria-hidden="true"></span>
+  ))}
+
+  {/* El signo más del final: dos barras perpendiculares que se contraen. */}
+  <span class="barra h" aria-hidden="true"></span>
+  <span class="barra v" aria-hidden="true"></span>
+
+  {/* Confeti: solo sale mientras el puntero está sobre un botón de descarga.
+      Los valores se reparten en abanico de forma determinista — nada de azar,
+      que en el servidor cambiaría en cada build. */}
+  {Array.from({ length: 10 }, (_, i) => {
+    const angulo = -58 + i * (116 / 9);
+    const distancia = 0.95 + ((i * 7) % 5) * 0.14;
+    const giro = (i % 2 ? 1 : -1) * (200 + i * 40);
+    return (
+      <span
+        class="confeti"
+        style={`--a:${angulo.toFixed(1)}deg; --d:${distancia.toFixed(2)}em; --giro:${giro}deg; --retardo:${i * 75}ms; --color:${i % 2 ? 'var(--accent)' : 'var(--fg)'}`}
+        aria-hidden="true"
+      ></span>
+    );
+  })}
+
+  {/* Signos de pesos: solo en Cómo funciona. Salen pegados a los lados del
+      fantasma, desde su mitad hacia arriba, en ráfagas de cuatro separadas
+      por una pausa: primero los dos de la izquierda, luego los de la derecha
+      (el fantasma los sigue con la mirada; ver «curioso» abajo). Lima (el acento) = ingreso, tinta = gasto. Valores fijos, nada de
+      azar (en el servidor cambiaría en cada build). */}
+  {[
+    { x: -1.6, sube: 2.4, retardo: 600,  color: 'var(--accent)' },
+    { x: -2.7, sube: 1.5, retardo: 950,  color: 'var(--fg)' },
+    { x:  1.7, sube: 1.6, retardo: 1350, color: 'var(--fg)' },
+    { x:  2.8, sube: 2.3, retardo: 1750, color: 'var(--accent)' },
+  ].map(({ x, sube, retardo, color }) => (
+    <span
+      class="peso"
+      style={`--x:${x}em; --sube:${sube}em; --retardo:${retardo}ms; --color:${color}`}
+      aria-hidden="true"
+    >$</span>
+  ))}
+</button>
+
+<script>
+  const fantasma = document.querySelector<HTMLButtonElement>('[data-fantasma]');
+  const escena = document.querySelector<HTMLElement>('[data-escena]');
+
+  if (fantasma && escena) {
+    // Las secciones son la única fuente de verdad: cuál está activa lo dice
+    // su propio atributo, no un contador aparte que pudiera desincronizarse.
+    // Añadir una sección a index.astro basta para que entre en el recorrido.
+    const secciones = [...escena.querySelectorAll<HTMLElement>(':scope > section')];
+    const total = secciones.length;
+    const actual = () => Math.max(0, secciones.findIndex((s) => s.hasAttribute('data-activa')));
+
+    const activar = (i: number) => {
+      secciones.forEach((s, n) => s.toggleAttribute('data-activa', n === i));
+      anunciar();
+      avisar();
+    };
+
+    // Aviso al navbar, que no sabe nada del fantasma: solo escucha este
+    // evento. Le dice el nombre y, si la sección es parte de un grupo
+    // (secciones SEGUIDAS con el mismo nombre), cuántas son y en cuál vas.
+    function avisar() {
+      const i = actual();
+      const nombre = secciones[i]?.dataset.nombre ?? '';
+      let desde = i;
+      let hasta = i;
+      while (desde > 0 && secciones[desde - 1].dataset.nombre === nombre) desde--;
+      while (hasta < total - 1 && secciones[hasta + 1].dataset.nombre === nombre) hasta++;
+      document.dispatchEvent(
+        new CustomEvent('spook:paso', {
+          detail: { nombre, pasos: hasta - desde + 1, paso: i - desde },
+        }),
+      );
+    }
+
+    // El anuncio dice el nombre de la sección SIGUIENTE. En la última no hay
+    // siguiente: entonces dice la frase de cierre de la sección actual, si la
+    // tiene; si no, se esconde. Al volver a mostrarse, la animación arranca de
+    // nuevo porque `hidden` la saca y la mete del flujo.
+    const anuncio = fantasma.querySelector<HTMLElement>('[data-anuncio]');
+    const anuncioTexto = fantasma.querySelector<HTMLElement>('[data-anuncio-texto]');
+    function anunciar() {
+      if (!anuncio || !anuncioTexto) return;
+      const nombre =
+        secciones[actual() + 1]?.dataset.seccion ??
+        secciones[actual()]?.dataset.cierre ??
+        '';
+      anuncioTexto.textContent = nombre;
+      anuncio.hidden = !nombre;
+    }
+    anunciar();
+    // Al cargar, el navbar trae «Inicio» escrito de fábrica; si la página abrió
+    // en otra sección (por un #id en la URL), hay que corregirlo.
+    avisar();
+
+    let ocupado = false;
+
+    /** Pasa a la sección `destino`, escondiendo el corte en la implosión. */
+    const saltar = (destino: number) => {
+      if (ocupado || destino === actual() || destino < 0 || destino >= total) return;
+
+      ocupado = true;
+      fantasma.classList.remove('volviendo');
+      fantasma.classList.add('yendose');
+
+      // El relevo ocurre cuando el fantasma ya no se ve: el corte queda
+      // tapado por su propia desaparición.
+      window.setTimeout(() => activar(destino), 460);
+
+      window.setTimeout(() => {
+        fantasma.classList.remove('yendose');
+        fantasma.classList.add('volviendo');
+      }, 900);
+
+      window.setTimeout(() => {
+        fantasma.classList.remove('volviendo');
+        ocupado = false;
+      }, 1400);
+    };
+
+    /**
+     * @param delta   +1 avanza, -1 retrocede
+     * @param ciclico si al pasar del último vuelve al primero
+     */
+    const ir = (delta: number, ciclico = false) => {
+      let destino = actual() + delta;
+      if (ciclico) destino = (destino + total) % total;
+      saltar(destino);
+    };
+
+    // El navbar pide ir a una sección por su nombre: se entra por la PRIMERA
+    // de ese nombre (en un grupo, su inicio).
+    document.addEventListener('spook:ir', (e) => {
+      const nombre = (e as CustomEvent).detail?.nombre;
+      saltar(secciones.findIndex((s) => s.dataset.nombre === nombre));
+    });
+
+    // Pulsarlo avanza en bucle: es un botón, y quedarse muerto en el último
+    // paso sería una trampa.
+    fantasma.addEventListener('click', () => ir(1, true));
+
+    // La rueda NO da la vuelta: en los extremos no pasa nada, como esperaría
+    // cualquiera que desplaza una página.
+    //
+    // Se ACUMULA el recorrido en vez de mirar cada evento por separado, y esa
+    // es la parte que importa: un trackpad manda deltas diminutos al empezar
+    // (0.5, 1, 2…) que van creciendo. Descartándolos por pequeños, el gesto no
+    // llegaba a dispararse nunca — funcionaba con rueda de ratón, que manda un
+    // solo salto grande, y no con trackpad.
+    let ultimaRueda = 0;
+    let acumulado = 0;
+    let yaDisparado = false;
+
+    window.addEventListener(
+      'wheel',
+      (e) => {
+        const ahora = performance.now();
+        // 220ms sin eventos = el dedo se levantó: empieza un gesto nuevo.
+        if (ahora - ultimaRueda > 220) {
+          acumulado = 0;
+          yaDisparado = false;
+        }
+        ultimaRueda = ahora;
+
+        if (yaDisparado) return;
+        acumulado += e.deltaY;
+        // Umbral bajo a propósito: basta un gesto corto para pasar de sección.
+        if (Math.abs(acumulado) < 12) return;
+
+        yaDisparado = true;
+        ir(acumulado > 0 ? 1 : -1);
+      },
+      { passive: true },
+    );
+
+    // En táctil se mide el recorrido del dedo de principio a fin.
+    let inicioY: number | null = null;
+    window.addEventListener('touchstart', (e) => { inicioY = e.touches[0].clientY; }, { passive: true });
+    window.addEventListener('touchend', (e) => {
+      if (inicioY === null) return;
+      const recorrido = inicioY - e.changedTouches[0].clientY;
+      inicioY = null;
+      if (Math.abs(recorrido) < 25) return;
+      ir(recorrido > 0 ? 1 : -1);
+    }, { passive: true });
+  }
+</script>
+
+<style>
+  /* Fijo a la ventana, no a la sección: así sigue en su sitio aunque el
+     contenido de encima sea más alto que la pantalla.
+     Se centra con `inset-inline: 0` + `margin-inline: auto` y NO con
+     `translate: -50%`: la propiedad `translate` es de un solo valor y la
+     necesita entera la animación de flotar. */
+  .bajar {
+    position: fixed;
+    z-index: 50;
+    bottom: var(--fantasma-bottom);
+    inset-inline: 0;
+    margin-inline: auto;
+    /* El cuerpo es la unidad: `1em` = el ancho del fantasma. Así el radio y el
+       tamaño de las chispas se escriben en proporción a él. */
+    font-size: var(--fantasma);
+    width: 1em;
+    height: 1em;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    /* En la tinta que manda: es la única señal de que hay algo más. */
+    color: var(--fg);
+    transition: color 0.28s ease, opacity 0.2s ease;
+    /* El vaivén va HACIA ABAJO y vuelve: el gesto apunta en la dirección en
+       la que hay que seguir. */
+    animation: flotar 2.6s ease-in-out infinite;
+  }
+  .bajar:hover { opacity: 0.55; }
+
+  /* En Descarga el fantasma se retira: es el final, el protagonismo es de los
+     botones, y abajo queda el pie. `visibility` va con retraso para que el
+     fundido se vea antes de que deje de existir para el puntero. La rueda y
+     el gesto siguen funcionando para volver. */
+  :global(body:has(#descargar[data-activa])) .bajar {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: color 0.28s ease, opacity 0.3s ease, visibility 0s linear 0.3s;
+  }
+
+  /* ------------------------------------------------------------ anuncio -- */
+  .anuncio {
+    position: absolute;
+    bottom: calc(100% + 0.9rem);
+    left: 50%;
+    /* Centrado con `translate` y la animación con `transform`: son
+       propiedades distintas y se componen, así que no se pisan. */
+    translate: -50% 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.45rem 0.7rem 0.45rem 0.85rem;
+    border-radius: 999px;
+    /* En `rem`, no en `em`: el botón usa `em` como unidad del fantasma (46px)
+       y el texto heredaría ese tamaño. */
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    background: var(--accent);
+    color: var(--on-accent);
+    opacity: 0;
+    pointer-events: none;
+    /* Aparece a los 6s y, cuando se va, vuelve 6s DESPUÉS de irse: la pausa
+       se cuenta desde que desaparece, no desde que apareció. Ciclo de 8,5s =
+       0,3s de entrada + 1,9s a la vista + 0,3s de salida + 6s de pausa. */
+    animation: anunciar 8.5s ease-in-out 6s infinite;
+  }
+  .anuncio[hidden] { display: none; }
+
+  .anuncio svg { width: 0.95rem; height: 0.95rem; flex: none; }
+
+  /* La colita: convierte la píldora en algo que dice el fantasma. */
+  .anuncio::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    translate: -50% 0;
+    border: 0.32rem solid transparent;
+    border-top-color: var(--accent);
+    border-bottom: 0;
+  }
+
+  /* Mientras implosiona, el anuncio se calla. */
+  .bajar.yendose .anuncio { animation: none; opacity: 0; }
+
+  @keyframes anunciar {
+    0%, 100%     { opacity: 0; transform: translateY(6px) scale(0.92); }
+    3.5%, 25.9%  { opacity: 1; transform: translateY(0) scale(1); }
+    29.4%        { opacity: 0; transform: translateY(-3px) scale(0.98); }
+  }
+
+  @keyframes flotar {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 0.35rem; }
+  }
+
+  .glifo { display: block; }
+
+  /* ---------------------------------------------------------- implosión -- */
+  /* Una explosión al revés: las chispas entran desde fuera y se juntan en el
+     centro mientras el fantasma se encoge hasta desaparecer.
+     Van en esta capa y no dentro del SVG a propósito: un path relleno no se
+     puede partir en trozos con CSS. */
+
+  .chispa {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0.075em;
+    height: 0.075em;
+    border-radius: 999px;
+    background: var(--fg);
+    opacity: 0;
+    /* El radio está calibrado contra la TINTA del fantasma, no contra su caja:
+       el glifo ocupa 0.49 × 0.55em dentro de 1em, así que su esquina llega a
+       0.37em del centro. Saliendo de 0.42em arrancan pegadas a la silueta.
+       (Ojo al medirlo: el `getBBox()` del grupo devuelve coordenadas locales,
+       sin el `scale(0.1)` — hay que dividir por diez.) */
+    transform: rotate(var(--angulo)) translateX(0.42em);
+    pointer-events: none;
+  }
+
+  /* El signo más del final. Son dos barras independientes porque cada una
+     encoge por su eje — la horizontal por el ancho, la vertical por el alto —
+     y al quedar ambas del tamaño mínimo se solapan en un único punto. */
+  .barra {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0.075em;
+    height: 0.075em;
+    border-radius: 999px;
+    background: var(--accent);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .bajar.yendose .glifo   { animation: tragar 900ms cubic-bezier(0.55, 0, 0.2, 1) forwards; }
+  .bajar.yendose .chispa  { animation: implosion 900ms cubic-bezier(0.55, 0, 0.2, 1) forwards; }
+  .bajar.yendose .barra.h { animation: mas-h 900ms cubic-bezier(0.5, 0, 0.15, 1) forwards; }
+  .bajar.yendose .barra.v { animation: mas-v 900ms cubic-bezier(0.5, 0, 0.15, 1) forwards; }
+  .bajar.volviendo .glifo { animation: aparecer 460ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  /* El SVG pinta con `currentColor`, así que basta animar el color del
+     envoltorio para que el fantasma se encienda antes de irse. */
+  @keyframes tragar {
+    0%        { opacity: 1; scale: 1;    color: var(--fg); }
+    14%       { opacity: 1; scale: 1.08; color: var(--accent); }
+    38%, 100% { opacity: 0; scale: 0.1;  color: var(--accent); }
+  }
+
+  /* Punto → línea → punto. El estirón va en el ANCHO y no en `scaleX`:
+     escalar un círculo lo convierte en una elipse, y una elipse es puntiaguda
+     en los extremos. Creciendo el ancho con el alto fijo y el radio de borde
+     al máximo, la forma es una cápsula y los extremos siguen siendo
+     semicírculos. Y no llegan al centro: si convergieran a cero, las cuatro se
+     apilarían en una sola mancha. */
+  @keyframes implosion {
+    0%        { opacity: 0; width: 0.075em; background: var(--fg);
+                transform: rotate(var(--angulo)) translateX(0.42em); }
+    12%       { opacity: 1; width: 0.13em;  background: var(--fg);
+                transform: rotate(var(--angulo)) translateX(0.37em); }
+    24%       {             width: 0.19em;  background: var(--accent); }
+    34%       { opacity: 1; width: 0.13em;  background: var(--accent);
+                transform: rotate(var(--angulo)) translateX(0.21em); }
+    42%, 100% { opacity: 0; width: 0.075em; background: var(--accent);
+                transform: rotate(var(--angulo)) translateX(0.16em); }
+  }
+
+  @keyframes mas-h {
+    0%, 47%  { opacity: 0; width: 0.075em; }
+    58%      { opacity: 1; width: 0.66em; }
+    78%, 92% { opacity: 1; width: 0.075em; }
+    100%     { opacity: 0; width: 0.075em; }
+  }
+  @keyframes mas-v {
+    0%, 47%  { opacity: 0; height: 0.075em; }
+    58%      { opacity: 1; height: 0.66em; }
+    78%, 92% { opacity: 1; height: 0.075em; }
+    100%     { opacity: 0; height: 0.075em; }
+  }
+
+  @keyframes aparecer {
+    from { opacity: 0; scale: 0.5; }
+    to   { opacity: 1; scale: 1; }
+  }
+
+  /* ------------------------------------------------------------ confeti -- */
+
+  .confeti {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0.1em;
+    height: 0.2em;
+    border-radius: 1px;
+    background: var(--color);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* `:has()` deja que el fantasma reaccione a algo que ocurre en OTRO
+     componente, sin una línea de JavaScript: el <body> se pregunta si hay
+     algún botón de descarga con el puntero encima. */
+  :global(body:has([data-descarga]:hover)) .confeti {
+    animation: confeti 950ms ease-out var(--retardo) infinite;
+  }
+
+  /* Y el fantasma sonríe. `--sonrisa` es una variable heredada que el logo
+     lee: él expone la perilla, y quien decide cuándo accionarla es esta capa,
+     que sí sabe qué son los botones de descarga. */
+  :global(body:has([data-descarga]:hover)) .glifo {
+    --sonrisa: 1;
+  }
+
+  /* Dos giros en el mismo `transform` y no es redundante: el PRIMERO orienta
+     la dirección de salida (el abanico), el SEGUNDO hace voltear al papelito
+     sobre sí mismo mientras vuela. */
+  @keyframes confeti {
+    0%   { opacity: 0; transform: rotate(var(--a)) translateY(0) rotate(0deg); }
+    12%  { opacity: 1; }
+    65%  { opacity: 1; }
+    100% { opacity: 0;
+           transform: rotate(var(--a)) translateY(calc(-1 * var(--d))) rotate(var(--giro)); }
+  }
+
+  /* ------------------------------------------------------------- pesos -- */
+  /* El tamaño va en `em` del FANTASMA reducido a un cuarto; desde ahí, los
+     desplazamientos (`--x`, `--sube`) se miden en el em del propio signo. */
+  .peso {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    font-size: 0.26em;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color);
+    opacity: 0;
+    pointer-events: none;
+    translate: -50% -50%;
+  }
+
+  :global(body:has(#como-funciona[data-activa])) .peso {
+    /* Cada signo vive ~2,2s de un ciclo de 6s: el resto es la pausa entre
+       ráfaga y ráfaga. */
+    animation: peso 6s ease-out var(--retardo) infinite;
+  }
+  /* Mientras implosiona, los signos se callan como el anuncio. */
+  .bajar.yendose .peso { animation: none; opacity: 0; }
+
+  /* Y los mira: con las cejas arriba, primero a la izquierda y luego a la
+     derecha, al compás de los signos. Comparte ciclo (6s) con ellos y arranca
+     en el mismo instante — ambos se encienden con el mismo selector —, así que
+     no se desincronizan. En porcentaje: 1% = 60ms; los signos de la izquierda
+     salen a 600 y 950ms (10%, 16%) y los de la derecha a 1350 y 1750ms
+     (22,5%, 29%). */
+  :global(body:has(#como-funciona[data-activa])) .glifo :global(.ojo) {
+    animation: curioso-ojos 6s ease-in-out infinite;
+  }
+  :global(body:has(#como-funciona[data-activa])) .glifo :global(.ceja) {
+    animation: curioso-cejas 6s ease-in-out infinite;
+  }
+
+  @keyframes curioso-ojos {
+    0%, 8%      { transform: translateX(0) scaleY(1); }
+    11%, 20%    { transform: translateX(-50%) scaleY(1); }
+    23.5%, 40%  { transform: translateX(50%) scaleY(1); }
+    44%, 62%    { transform: translateX(0) scaleY(1); }
+    /* un parpadeo en la pausa, para que no se quede mirando fijo */
+    63%         { transform: translateX(0) scaleY(0.06); }
+    64.5%, 100% { transform: translateX(0) scaleY(1); }
+  }
+
+  /* Las cejas suben al empezar a mirar, acompañan a los ojos de lado a lado
+     y bajan desvaneciéndose al volver al centro. */
+  @keyframes curioso-cejas {
+    0%, 8%      { opacity: 0; transform: translate(0, 40%); }
+    11%, 20%    { opacity: 1; transform: translate(-45%, -25%); }
+    23.5%, 40%  { opacity: 1; transform: translate(45%, -25%); }
+    44%         { opacity: 1; transform: translate(0, -10%); }
+    48%, 100%   { opacity: 0; transform: translate(0, 40%); }
+  }
+
+  /* En Organiza, donde pregunta «¿Y los ingresos?», pone cara de pregunta:
+     levanta SOLO la ceja izquierda y entrecierra el ojo derecho. El ojo
+     entrecerrado baja desde arriba (origen abajo), como un párpado; el otro
+     se abre un poco. Ciclo de 6s: gesto, sostenerlo, soltarlo y parpadear
+     con los dos en la pausa. */
+  :global(body:has(#organiza[data-activa])) .glifo :global(.ceja.izq) {
+    animation: pregunta-ceja 6s ease-in-out infinite;
+  }
+  :global(body:has(#organiza[data-activa])) .glifo :global(.ojo.izq) {
+    animation: pregunta-ojo-abierto 6s ease-in-out infinite;
+  }
+  :global(body:has(#organiza[data-activa])) .glifo :global(.ojo.der) {
+    transform-origin: 50% 100%;
+    animation: pregunta-ojo-cerrado 6s ease-in-out infinite;
+  }
+
+  @keyframes pregunta-ceja {
+    0%, 8%     { opacity: 0; transform: translateY(40%) rotate(0deg); }
+    14%        { opacity: 1; transform: translateY(-40%) rotate(8deg); }
+    36%        { opacity: 1; transform: translateY(-55%) rotate(10deg); }
+    62%        { opacity: 1; transform: translateY(-40%) rotate(8deg); }
+    70%, 100%  { opacity: 0; transform: translateY(40%) rotate(0deg); }
+  }
+  @keyframes pregunta-ojo-abierto {
+    0%, 8%     { transform: scaleY(1); }
+    14%, 62%   { transform: scaleY(1.06); }
+    70%, 84%   { transform: scaleY(1); }
+    85.5%      { transform: scaleY(0.06); }
+    87%, 100%  { transform: scaleY(1); }
+  }
+  @keyframes pregunta-ojo-cerrado {
+    0%, 8%     { transform: scaleY(1); }
+    14%, 62%   { transform: scaleY(0.55); }
+    70%, 84%   { transform: scaleY(1); }
+    85.5%      { transform: scaleY(0.06); }
+    87%, 100%  { transform: scaleY(1); }
+  }
+
+  @keyframes peso {
+    0%        { opacity: 0; transform: translate(var(--x), 0) scale(0.6); }
+    6%        { opacity: 1; transform: translate(var(--x), calc(-0.25 * var(--sube))) scale(1); }
+    24%       { opacity: 1; }
+    36%, 100% { opacity: 0; transform: translate(var(--x), calc(-1 * var(--sube))) scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bajar { animation: none; }
+    :global(body:has(#como-funciona[data-activa])) .peso,
+    :global(body:has(#como-funciona[data-activa])) .glifo :global(:is(.ojo, .ceja)),
+    :global(body:has(#organiza[data-activa])) .glifo :global(:is(.ojo, .ceja)) { animation: none; }
+    .bajar.yendose .glifo,
+    .bajar.yendose .chispa,
+    .bajar.yendose .barra,
+    .bajar.volviendo .glifo,
+    :global(body:has([data-descarga]:hover)) .confeti { animation: none; }
+    /* Con movimiento reducido el anuncio no parpadea: se queda fijo. */
+    .anuncio { animation: none; opacity: 1; }
+  }
+</style>

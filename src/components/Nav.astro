@@ -1,23 +1,42 @@
 ---
 /**
- * Navbar: la marca a la izquierda, el botón de tema a la derecha y, en el
- * medio, EN QUÉ SECCIÓN ESTÁS.
+ * Navbar: la marca a la izquierda, el cambio de tema a la derecha y, en el
+ * medio, TODAS las secciones. La activa va en tinta con un punto lima debajo;
+ * las demás, en el gris que le sigue en la paleta de la app.
  *
- * No es un menú: es un indicador. El nombre lo escribe cada sección con su
- * prop `label` y el navbar lo va cambiando según cuál cruza la mitad de la
- * pantalla.
+ * Varias secciones seguidas con el mismo `nombre` son un grupo (Cómo funciona:
+ * registro, organiza, ingresos, reportes): su ítem lleva un punto por sección
+ * y el lima marca en cuál vas.
  *
- * El valor inicial se sirve ya escrito desde el servidor, para que no aparezca
- * vacío y se rellene después a la vista del usuario.
+ * Lo actualiza el evento `spook:paso` que emite el fantasma al cambiar de
+ * sección, y al pulsar un ítem se le pide ir allí con `spook:ir`.
+ *
+ * OJO: estos nombres tienen que coincidir con los `nombre` de las secciones.
  */
-const inicial = 'Inicio';
+const items = ['Inicio', 'Qué es', 'Cómo funciona', 'Descarga'];
 ---
 
 <header class="bar">
   <div class="inner">
     <a class="brand" href="/">Spook AI</a>
 
-    <p class="actual" data-actual>{inicial}</p>
+    <nav aria-label="Secciones">
+      <ul>
+        {items.map((nombre, i) => (
+          <li>
+            <button
+              type="button"
+              class:list={['item', { on: i === 0 }]}
+              data-item={nombre}
+              aria-current={i === 0 ? 'step' : undefined}
+            >
+              {nombre}
+              <span class="puntos" aria-hidden="true">{i === 0 && <i class="on"></i>}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </nav>
 
     <button id="theme-toggle" class="toggle" type="button" aria-label="Cambiar de tema">
       <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -44,28 +63,31 @@ const inicial = 'Inicio';
     transition: background-color 0.28s ease;
   }
 
-  /* La misma columna que el contenido, para que la marca caiga exactamente
-     sobre el borde izquierdo de los títulos. Tres columnas: el grupo del medio
-     queda centrado en la BARRA y no respecto a la marca — con un flex simple,
-     el ancho de "Spook" lo desplazaría. La tercera está vacía a propósito, es
-     el contrapeso. */
+  /* Su propia columna, de 900px: más ancha que la del contenido (800px). */
+  /* Tres columnas: el indicador queda centrado en la BARRA y no entre la marca
+     y el botón — con un flex simple, el ancho de la marca lo desplazaría. */
   .inner {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    max-width: var(--col-max);
+    /* El alto lo fija el token, no los hijos. Antes lo daba el `min-height` de
+       los enlaces; al quitarlos la barra encogió a la altura del botón y dejó
+       de cuadrar con lo que las secciones descuentan. */
+    min-height: var(--nav-h);
+    max-width: var(--nav-max);
     margin-inline: auto;
     padding-inline: var(--col-pad);
   }
 
   .brand {
-    grid-column: 1;
+    /* Sin esto el enlace se estira a toda su columna del grid y se podía
+       pulsar muy lejos del texto. */
     justify-self: start;
     /* Una sola línea siempre: sin esto, en pantallas estrechas se partía en
        "Spook / AI" y la barra crecía a dos filas. */
     white-space: nowrap;
     font-size: 1.125rem;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: -0.02em;
     /* La marca no es un estado de navegación: va siempre en la tinta que
        manda, no en el gris de lo inactivo. */
@@ -74,44 +96,66 @@ const inicial = 'Inicio';
     transition: color 0.28s ease;
   }
 
-  /* El indicador. No es un enlace: no lleva a ninguna parte, dice dónde estás.
-     El punto lima debajo es la marca de "aquí". */
-  .actual {
+  /* -------------------------------------------------------------- items -- */
+
+  ul {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .item {
     position: relative;
-    grid-column: 2;
-    justify-self: center;
     display: inline-flex;
     align-items: center;
     min-height: var(--nav-h);
-    margin: 0;
-    padding: 0 1rem;
-    font-size: 1.0625rem;
-    font-weight: 500;
+    padding: 0 0.75rem;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 400;
     letter-spacing: -0.01em;
-    color: var(--fg);
-    transition: color 0.28s ease, opacity 0.15s ease;
+    white-space: nowrap;
+    /* Inactivo: el gris callado de la app. */
+    color: var(--fg-3);
+    cursor: pointer;
+    transition: color 0.2s ease;
   }
+  .item:hover { color: var(--fg-2); }
+  .item.on { color: var(--fg); cursor: default; }
 
-  .actual::after {
-    content: "";
+  /* Los puntos van debajo del nombre, centrados. Solo el ítem activo los
+     tiene: uno, o uno por sección si es un grupo. */
+  .puntos {
     position: absolute;
     left: 50%;
     translate: -50% 0;
     bottom: calc(50% - 0.5rem - 10px);
+    display: flex;
+    gap: 5px;
+  }
+  /* `:global` porque los puntos los rehace el script, y los elementos creados
+     desde JS no llevan el atributo de ámbito de Astro: una regla con ámbito
+     no los alcanzaría. */
+  .puntos :global(i) {
+    display: block;
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--fg-4);
+    transition: background-color 0.25s ease;
   }
+  .puntos :global(i.on) { background: var(--accent); }
 
   /* -------------------------------------------------------------- toggle -- */
 
   .toggle {
     /* Al otro extremo: el hueco hasta el borde derecho es el mismo que el de
-       la marca hasta el izquierdo, porque las dos columnas de los lados miden
-       1fr y comparten el padding de la columna. */
-    grid-column: 3;
-    justify-self: end;
+       la marca hasta el izquierdo, porque comparten el padding de la columna. */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -121,13 +165,14 @@ const inicial = 'Inicio';
     border: 0;
     border-radius: 999px;
     background: transparent;
-    /* El icono va en el lima de la marca, no en el gris de lo inactivo: es el
-       único control de la barra y el acento lo señala. */
-    color: var(--accent);
+    /* En la tinta que manda, como la marca: negro en claro, blanco en
+       oscuro. */
+    color: var(--fg);
+    justify-self: end;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.28s ease;
   }
-  /* Al pasar por encima cambia el fondo, no el icono: el lima se queda. */
+  /* Al pasar por encima cambia el fondo, no el icono. */
   .toggle:hover {
     background: var(--card);
   }
@@ -153,41 +198,27 @@ const inicial = 'Inicio';
   :global(:root[data-theme="light"]) .moon { display: block; }
   :global(:root[data-theme="light"]) .sun  { display: none; }
 
-  /* En pantallas estrechas la marca y el grupo se pelean por el sitio: el
-     grupo deja de estar centrado y se va a la derecha. */
-  /* En pantallas estrechas se aprieta un poco para que quepan marca,
-     indicador y botón sin esconder nada. */
-  @media (max-width: 430px) {
-    .brand { font-size: 1rem; }
-    .actual { padding-inline: 0.5rem; font-size: 0.9375rem; }
-    .toggle { width: 40px; height: 40px; }
+  /* En teléfono no caben la marca, los cuatro ítems y el botón: la marca se
+     retira (el titular de la portada ya dice «Spook AI») y los ítems se
+     aprietan. */
+  @media (max-width: 640px) {
+    .inner { grid-template-columns: minmax(0, 1fr) auto; column-gap: 0.5rem; }
+    .brand { display: none; }
+    /* El primer ítem se come su propio relleno para quedar alineado con el
+       borde de la columna. Si aun así no cabe (teléfonos de 320px), la fila
+       se desliza de lado en vez de empujar el botón fuera. */
+    nav { justify-self: start; min-width: 0; max-width: 100%; margin-left: -0.45rem; overflow-x: auto; }
+    ul { gap: 0; }
+    .item { padding-inline: 0.45rem; font-size: 0.875rem; }
+    .toggle { width: 40px; height: 40px; margin-right: -0.5rem; }
     .toggle svg { width: 18px; height: 18px; }
+  }
+  @media (max-width: 380px) {
+    .item { padding-inline: 0.35rem; font-size: 0.8125rem; }
   }
 </style>
 
 <script>
-  // --- el indicador de sección ---
-  const salida = document.querySelector('[data-actual]');
-  const secciones = document.querySelectorAll<HTMLElement>('[data-seccion]');
-
-  if (salida && secciones.length) {
-    const observador = new IntersectionObserver(
-      (entradas) => {
-        for (const e of entradas) {
-          // Con este margen, "intersecta" significa "cruza la mitad de la
-          // pantalla". Así solo una sección cumple a la vez y no hay que
-          // decidir empates.
-          if (!e.isIntersecting) continue;
-          const nombre = (e.target as HTMLElement).dataset.seccion;
-          if (!nombre || nombre === salida.textContent) continue;
-          salida.textContent = nombre;
-        }
-      },
-      { rootMargin: '-50% 0px -50% 0px' },
-    );
-    secciones.forEach((seccion) => observador.observe(seccion));
-  }
-
   const KEY = 'spook-theme';
   const root = document.documentElement;
   const button = document.getElementById('theme-toggle');
@@ -204,6 +235,33 @@ const inicial = 'Inicio';
   };
 
   paint(root.dataset.theme ?? 'light');
+
+  // Los ítems: el activo en tinta con sus puntos; los demás, sin puntos.
+  const itemsNav = [...document.querySelectorAll<HTMLButtonElement>('[data-item]')];
+  document.addEventListener('spook:paso', (e) => {
+    const { nombre, pasos, paso } = (e as CustomEvent).detail as {
+      nombre: string; pasos: number; paso: number;
+    };
+    itemsNav.forEach((item) => {
+      const activo = item.dataset.item === nombre;
+      item.classList.toggle('on', activo);
+      if (activo) item.setAttribute('aria-current', 'step');
+      else item.removeAttribute('aria-current');
+      const puntos = item.querySelector('.puntos');
+      if (!puntos) return;
+      const n = activo ? pasos : 0;
+      if (puntos.children.length !== n) {
+        puntos.replaceChildren(...Array.from({ length: n }, () => document.createElement('i')));
+      }
+      [...puntos.children].forEach((p, i) => p.classList.toggle('on', i === paso));
+    });
+  });
+
+  itemsNav.forEach((item) =>
+    item.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('spook:ir', { detail: { nombre: item.dataset.item } }));
+    }),
+  );
 
   button?.addEventListener('click', () => {
     paint(root.dataset.theme === 'dark' ? 'light' : 'dark');

@@ -1,0 +1,60 @@
+---
+/**
+ * Organiza: todo queda en una lista, por categoría, y las etiquetas lo
+ * agrupan a tu manera.
+ *
+ * Los textos son un BORRADOR fiel a lo que hace la app (etiquetas propias que
+ * cruzan categorías, hasta 5 por gasto; «Recurrente» que se vuelve a cobrar
+ * cada mes; «Excedió presupuesto» que pone el sistema). El copy lo escribe el
+ * usuario. En el teléfono, capturas reales que se pasan solas.
+ */
+import Split from './Split.astro';
+import Items from './Items.astro';
+
+// Los iconos de las dos marcas del sistema son los de la app (ExpenseCard):
+// IterationCw para Recurrente y OctagonAlert para Excedió presupuesto. Sin
+// sus colores, a petición: aquí van en tinta como el resto de la lista.
+const etiquetas = [
+  {
+    nombre: 'Tus etiquetas',
+    detalle: 'Agrupa gastos de distintas categorías, como un viaje, y mira cuánto suman.',
+    icono: '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
+  },
+  {
+    nombre: 'Recurrente',
+    detalle: 'Márcalo y se registra solo cada mes.',
+    icono: '<path d="M4 10a8 8 0 1 1 8 8H4"/><path d="m8 22-4-4 4-4"/>',
+  },
+  {
+    nombre: 'Excedió presupuesto',
+    detalle: 'Spook la pone sola cuando un gasto te saca del presupuesto.',
+    icono: '<path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/>',
+  },
+];
+---
+
+<Split
+  id="organiza"
+  label="¡Interesante! ¿Qué más?"
+  nombre="Cómo funciona"
+  src="/assets/landing/iphone.png"
+  alt=""
+  width={389}
+  height={800}
+  pantalla={{
+    /* La lista, el resumen por categorías y el detalle con sus etiquetas. */
+    imagenes: [
+      { src: '/assets/landing/organiza-lista.webp', alt: 'La lista de gastos del mes, cada uno con su categoría' },
+      { src: '/assets/landing/organiza-categorias.webp', alt: 'El resumen por categorías, con lo gastado frente al presupuesto' },
+      { src: '/assets/landing/organiza-etiquetas.webp', alt: 'El detalle de un gasto con sus etiquetas: Recurrente, Inversiones, Suscripciones' },
+    ],
+    fondo: '#FFFFFF',
+  }}
+>
+  <h2>Todo en su lugar</h2>
+  <p>
+    Cada gasto queda en tu lista y en su categoría. Con las etiquetas, lo
+    agrupas como tú quieras.
+  </p>
+  <Items items={etiquetas} />
+</Split>

@@ -1,6 +1,6 @@
 ---
 /**
- * La frase de la landing. Una pantalla, sin movimiento.
+ * La frase de la landing.
  *
  * El texto se escribe en caja baja y las versales las pone el CSS, para que
  * buscadores y lectores de pantalla lean una frase normal.
@@ -12,13 +12,24 @@
 import Section from './Section.astro';
 ---
 
-<Section id="inicio" label="Inicio">
+<Section id="inicio" nombre="Inicio">
   <div class="centro">
+    {/* Dos cortes de la MISMA frase: cuatro líneas en teléfono, tres en
+        escritorio. Solo uno se muestra a la vez y el otro va en
+        `display: none`, que también lo saca del árbol de accesibilidad: un
+        lector de pantalla lee la frase una sola vez. */}
     <h1>
-      <span>Spook AI</span>
-      <span>Tú y tu</span>
-      <span>dinero,</span>
-      <span>en paz</span>
+      <span class="corte movil">
+        <span class="linea"><span>Spook AI —</span></span>
+        <span class="linea"><span>Tú y tu</span></span>
+        <span class="linea"><span>dinero,</span></span>
+        <span class="linea"><span>en paz</span></span>
+      </span>
+      <span class="corte escritorio">
+        <span class="linea"><span>Spook AI —</span></span>
+        <span class="linea"><span>Tú y tu dinero,</span></span>
+        <span class="linea"><span>en paz</span></span>
+      </span>
     </h1>
   </div>
 </Section>
@@ -42,8 +53,7 @@ import Section from './Section.astro';
        astas ni colas — pero en español SÍ tienen acentos, y una Á o una Ó
        suben mucho más que una mayúscula normal. Medido en esta tipografía:
        mayúscula 0.713em, acentuada 0.901em. Con la cola de las versales
-       (0.016em), el piso donde dejan de chocar es 0.917em; a 0.88 la tilde de
-       la Ú se metía dentro de la línea de arriba. */
+       (0.016em), el piso donde dejan de chocar es 0.917em. */
     line-height: 0.96;
     /* Y necesitan menos tracking negativo, o se tocan entre ellas. */
     letter-spacing: -0.02em;
@@ -52,16 +62,63 @@ import Section from './Section.astro';
     transition: color 0.28s ease;
   }
 
-  /* Hijos DIRECTOS: cada uno es una línea del titular. El combinador `>` no es
-     cosmético — con `h1 span` la regla alcanzaba también a la coma anidada y la
-     convertía en bloque, partiendo la línea en dos.
+  .corte { display: block; }
+  .corte.escritorio { display: none; }
 
-     Y no bastaba con darle `display: inline` a la coma: el ámbito de Astro le
-     pone su atributo a CADA elemento del selector, así que
-     `h1[data-x] span[data-x]` (0,2,2) pesa más que `.acento[data-x]` (0,2,0).
-     Una clase no siempre gana aquí. */
-  h1 > span {
+  /* En escritorio la línea del medio es larga, así que el tamaño se limita
+     también por el ANCHO. Medido: «Tú y tu dinero,» mide 7.37em, y la
+     columna es de hasta 800px. De ahí el techo de 6.625rem (106px × 7.37 =
+     781px); el 10.5vw cubre las ventanas más angostas. */
+  @media (min-width: 820px) {
+    .corte.movil { display: none; }
+    .corte.escritorio { display: block; }
+    h1 { font-size: clamp(2.25rem, min(10.5vw, 11.8vh), 6.625rem); }
+  }
+
+  /* Cada línea es su propia máscara: el texto de dentro entra deslizándose
+     desde abajo y lo que sobresale queda recortado.
+     El relleno superior NO es decorativo: con `overflow: hidden` a ras de la
+     caja de línea, la tilde de la Ú y la Ó se cortan — las versales españolas
+     suben 0.901em sobre la línea base y la caja mide 0.96em. El margen
+     negativo devuelve ese hueco para que el ritmo vertical no cambie.
+     Y va en CONTENT-BOX porque con el border-box de Tailwind el relleno se
+     descontaría del alto en vez de sumarse. */
+  .linea {
+    display: block;
+    overflow: hidden;
+    box-sizing: content-box;
+    height: 0.96em;
+    padding-top: 0.14em;
+    margin-top: -0.14em;
+  }
+
+  .linea > span {
     display: block;
   }
 
+  /* La animación solo existe mientras esta sección es la activa. Eso no es un
+     detalle: al volver del paso 1 al 0, la propiedad `animation` se retira y
+     se vuelve a poner, y ESO es lo que hace que el revelado se repita en cada
+     vuelta en vez de una sola vez al cargar.
+     El selector NO nombra ninguna posición: la sección se anima cuando está
+     marcada como activa, esté donde esté en el orden. */
+  :global(section[data-activa]) .linea > span {
+    animation: revelar 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  :global(section[data-activa]) .linea:nth-child(1) > span { animation-delay: 0.04s; }
+  :global(section[data-activa]) .linea:nth-child(2) > span { animation-delay: 0.12s; }
+  :global(section[data-activa]) .linea:nth-child(3) > span { animation-delay: 0.2s; }
+  :global(section[data-activa]) .linea:nth-child(4) > span { animation-delay: 0.28s; }
+
+  /* 140% y no 100%: la caja de recorte es más alta que la línea por el hueco
+     de las tildes, así que con menos recorrido se asomarían las letras antes
+     de entrar. */
+  @keyframes revelar {
+    from { translate: 0 140%; }
+    to   { translate: 0 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(section[data-activa]) .linea > span { animation: none; }
+  }
 </style>

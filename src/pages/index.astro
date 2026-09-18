@@ -1,20 +1,128 @@
 ---
 /**
- * El esquema de la página. Cada sección es un bloque de contenido que ocupa
- * una pantalla. Añadir contenido nuevo = un componente más en esta lista.
+ * El esquema de la página.
  *
- * Sin animaciones todavía: primero la estructura, después el movimiento.
+ * Las secciones NO se recorren con scroll: se apilan una sobre otra y solo
+ * una está visible. El fantasma es quien pasa de una a la siguiente, y por eso
+ * vive fuera de ellas.
+ *
+ * Añadir contenido = un componente más en la lista, sin tocar nada más: el
+ * número de pasos se cuenta solo.
+ *
+ * EL PIE NO ESTÁ AQUÍ NI EN EL LAYOUT: solo debe aparecer con la última
+ * sección, así que lo lleva ella (Download.astro). Si otra sección pasa a ser
+ * la última, el pie se muda con ella.
  */
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
+import About from '../components/About.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import Organize from '../components/Organize.astro';
+import Incomes from '../components/Incomes.astro';
+import Reports from '../components/Reports.astro';
 import Download from '../components/Download.astro';
+import Fantasma from '../components/Fantasma.astro';
 ---
 <Base
   title="Spook AI — Tú y tu dinero, en paz"
   description="Tú y tu dinero, en paz."
 >
-  <main>
+  <main class="escena" data-escena>
     <Hero />
+    <About />
+    <HowItWorks />
+    <Organize />
+    <Incomes />
+    <Reports />
     <Download />
   </main>
+
+  {/*
+    Marca la primera sección ANTES de pintar. Si esto se dejara al script del
+    fantasma —que va diferido— la portada aparecería un instante sin su
+    animación de entrada.
+  */}
+  <script is:inline>
+    (() => {
+      // Con un #id en la URL (los enlaces del navbar de legal.html) se abre en
+      // esa sección; si no, en la primera.
+      const secciones = document.querySelectorAll('[data-escena] > section');
+      const id = decodeURIComponent(location.hash.slice(1));
+      const pedida = id && [...secciones].find((s) => s.id === id);
+      (pedida || secciones[0])?.setAttribute('data-activa', '');
+    })();
+  </script>
+
+  <Fantasma />
 </Base>
+
+<style>
+  /* Las secciones se apilan en la MISMA celda de la rejilla. Con posición
+     absoluta habría que fijarles una altura; así la escena mide lo que mida la
+     más alta y el resto se acomoda. */
+  .escena {
+    display: grid;
+    /* `clip` y no `hidden`: recorta sin crear un contenedor desplazable.
+       Hace falta porque la sección oculta lleva un `translate` hacia abajo
+       para entrar, y un desplazamiento cuenta para el alto del documento
+       aunque el elemento sea invisible — eran 24px de scroll fantasma. */
+    overflow: clip;
+  }
+
+  /* `:global` es necesario aquí: los estilos con ámbito de Astro no alcanzan a
+     los elementos que devuelve un componente hijo, y estas <section> vienen de
+     Section.astro. Es la capa de disposición de la página, así que este es su
+     sitio. */
+  .escena > :global(section) {
+    grid-area: 1 / 1;
+    transition:
+      opacity 420ms ease,
+      translate 520ms cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0s linear 0s;
+  }
+
+  /* La que no toca: apagada, sin estorbar al ratón y fuera del árbol de
+     accesibilidad. El retardo en `visibility` la mantiene presente mientras se
+     desvanece; sin él desaparecería de golpe y no habría transición.
+
+     La regla NO nombra posiciones: vale para dos secciones y para diez. */
+  .escena > :global(section:not([data-activa])) {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    translate: 0 1.5rem;
+    transition:
+      opacity 420ms ease,
+      translate 520ms cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0s linear 420ms;
+  }
+
+  /* Red de seguridad: si el script no llega a correr, nadie marca nada y la
+     regla de arriba las ocultaría TODAS. Entonces manda la primera. */
+  .escena:not(:has([data-activa])) > :global(section:first-of-type) {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    translate: 0 0;
+  }
+
+  /* Sitio abajo para que el fantasma y su globo no se monten encima del
+     contenido. En escritorio el texto va a un lado y el globo al centro, así
+     que basta con poco. En teléfono todo va en una columna bajo el globo:
+     ocupan ~7rem desde el borde, se reservan 8 y, para no perder alto, se
+     recorta el margen de arriba. */
+  .escena > :global(section) {
+    padding-bottom: 5.5rem;
+  }
+  @media (max-width: 819px) {
+    .escena > :global(section) {
+      padding-block: 2rem 8rem;
+    }
+  }
+  /* En uno bajo (un SE) cada píxel cuenta: el globo queda algo más abajo. */
+  @media (max-width: 819px) and (max-height: 740px) {
+    .escena > :global(section) {
+      padding-block: 1.5rem 7.5rem;
+    }
+  }
+</style>
