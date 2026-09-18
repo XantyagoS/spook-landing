@@ -3,7 +3,7 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  site: 'https://spook.app', // TODO: cambiar al dominio real cuando lo compres
+  site: 'https://spookai.app',
   devToolbar: { enabled: false },
   vite: { plugins: [tailwindcss()] },
 });
