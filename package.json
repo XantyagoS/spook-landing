@@ -7,7 +7,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "serve": "node scripts/serve.mjs",
-    "ver": "npm run build && node scripts/serve.mjs"
+    "ver": "npm run build && node scripts/serve.mjs",
+    "legal:pages": "node scripts/legal-pages.mjs"
   },
   "repository": {
     "type": "git",
