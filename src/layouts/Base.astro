@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
 
 interface Props {
   title: string;
@@ -18,8 +20,30 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
 
+    {/*
+      El tema se resuelve ANTES de pintar: si se dejara al script del navbar,
+      la página abriría en claro y saltaría a oscuro a la vista del usuario.
+      Por eso va en línea y sin diferir.
+    */}
+    <script is:inline>
+      (() => {
+        let theme;
+        try {
+          theme = localStorage.getItem('spook-theme');
+        } catch {}
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light';
+        }
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+
     <link rel="icon" type="image/png" href="/assets/landing/favicon.png" />
     <link rel="apple-touch-icon" href="/assets/landing/apple-touch-icon.png" />
+
+    <meta name="theme-color" content="#FFFFFF" />
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
@@ -27,11 +51,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content="es_CO" />
     <meta name="twitter:card" content="summary_large_image" />
-
-    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
   </head>
   <body>
+    <Nav />
     <slot />
+    <Footer />
   </body>
 </html>

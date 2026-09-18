@@ -1,0 +1,39 @@
+---
+/**
+ * Contenedor de una sección: una pantalla completa de alto, contenido alineado
+ * a la izquierda sobre una columna centrada y limitada.
+ *
+ * Es `min-height` y no `height` a propósito: si algún contenido crece más que
+ * la pantalla, la sección se estira en vez de recortarlo.
+ */
+interface Props {
+  id?: string;
+  /** Nombre que el navbar muestra cuando esta sección ocupa la pantalla. */
+  label?: string;
+}
+const { id, label } = Astro.props;
+---
+
+<section id={id} class="section" data-seccion={label}>
+  <div class="wrap">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .section {
+    display: flex;
+    align-items: center;
+    min-height: calc(100dvh - var(--nav-h));
+    padding-block: 3rem;
+  }
+
+  /* Alineado a la izquierda, el contenido no puede arrancar en el borde de una
+     pantalla ancha: se ancla a la columna compartida con legal.html. */
+  .wrap {
+    width: 100%;
+    max-width: var(--col-max);
+    margin-inline: auto;
+    padding-inline: var(--col-pad);
+  }
+</style>

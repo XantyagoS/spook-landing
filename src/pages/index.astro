@@ -1,16 +1,20 @@
 ---
+/**
+ * El esquema de la página. Cada sección es un bloque de contenido que ocupa
+ * una pantalla. Añadir contenido nuevo = un componente más en esta lista.
+ *
+ * Sin animaciones todavía: primero la estructura, después el movimiento.
+ */
 import Base from '../layouts/Base.astro';
-import TopBar from '../components/TopBar.astro';
 import Hero from '../components/Hero.astro';
-import Statement from '../components/Statement.astro';
+import Download from '../components/Download.astro';
 ---
 <Base
-  title="Spook — Deja de anotar gastos"
-  description="Fotografía la factura o descríbela por voz. La IA la lee, la categoriza y la guarda. Cero registro manual."
+  title="Spook AI — Tú y tu dinero, en paz"
+  description="Tú y tu dinero, en paz."
 >
-  <TopBar />
-  <main id="top">
+  <main>
     <Hero />
-    <Statement />
+    <Download />
   </main>
 </Base>

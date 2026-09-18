@@ -1,276 +1,67 @@
 ---
 /**
- * Hero: un escenario anclado. Mientras bajas, el titular se retira y el
- * teléfono sube hasta quedar solo en pantalla.
+ * La frase de la landing. Una pantalla, sin movimiento.
  *
- * Todo el movimiento es CSS (animation-timeline), cero JavaScript.
+ * El texto se escribe en caja baja y las versales las pone el CSS, para que
+ * buscadores y lectores de pantalla lean una frase normal.
  *
- * Coreografía: un único rango `contain 0% → contain 100%` para todos los
- * elementos, y el reparto se hace con porcentajes dentro de los keyframes.
- * Es a propósito: los rangos cortos NO retienen su estado final al pasarlos
- * (la animación se revierte), y así además la secuencia se lee de un vistazo.
+ * OJO al añadir o cambiar líneas: el h1 va en `nowrap`, así que un
+ * desbordamiento NO avisa — simplemente se sale por el lado. La línea más
+ * larga tiene que caber en el ancho de la columna.
  */
+import Section from './Section.astro';
 ---
 
-<section class="stage">
-  <div class="pin">
-    <div class="copy">
-      <p class="product">
-        <img src="/assets/landing/logo-mark.png" alt="" width="20" height="22" />
-        <span>Spook</span>
-      </p>
-
-      <h1 class="headline">
-        <span class="line"><span>Deja de</span></span>
-        <span class="line"><span>anotar</span></span>
-        <span class="line"><span>gastos.</span></span>
-      </h1>
-
-      <p class="lead">Fotografía la factura. La IA hace el resto.</p>
-
-      <div class="actions">
-        <a class="btn" href="#descargar">Descargar</a>
-        <a class="link" href="#como">Ver cómo funciona<span aria-hidden="true">&nbsp;›</span></a>
-      </div>
-    </div>
-
-    <div class="device">
-      <div class="bloom" aria-hidden="true"></div>
-      <div class="frame">
-        <img
-          src="/assets/landing/home-dark.png"
-          alt="La pantalla principal de Spook con los gastos del mes ya registrados"
-          width="589"
-          height="1280"
-          fetchpriority="high"
-        />
-      </div>
-    </div>
+<Section id="inicio" label="Inicio">
+  <div class="centro">
+    <h1>
+      <span>Spook AI</span>
+      <span>Tú y tu</span>
+      <span>dinero,</span>
+      <span>en paz</span>
+    </h1>
   </div>
-</section>
+</Section>
 
 <style>
-  .stage {
-    /* 100dvh de pantalla + 120dvh de recorrido mientras está anclado. */
-    height: 220dvh;
-    background: var(--color-night);
-    view-timeline-name: --stage;
-    view-timeline-axis: block;
-  }
-
-  .pin {
-    position: sticky;
-    top: 0;
-    height: 100dvh;
-    overflow: hidden;
-    isolation: isolate;
-  }
-
-  /* ---------------------------------------------------------------- copy -- */
-
-  .copy {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
+  .centro {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    /* Deja libre el borde inferior: ahí asoma el teléfono. */
-    padding: 1.5rem 1.5rem 25dvh;
     text-align: center;
   }
 
-  .product {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0 0 1.75rem;
-    font-size: 1rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    color: var(--color-chalk-2);
-  }
-  .product img { width: 20px; height: auto; filter: invert(1); }
-
-  .headline {
+  h1 {
     margin: 0;
-    /* El titular se mide contra el lado MÁS CORTO de la ventana: en una
-       pantalla ancha y baja, 17vw desbordaría el alto y chocaría con el
-       teléfono. */
-    font-size: clamp(3.5rem, min(17vw, 13.5vh), 9rem);
-    font-weight: 600;
-    line-height: 0.92;
-    letter-spacing: -0.045em;
-    color: var(--color-chalk);
+    font-size: var(--type-display);
+    font-weight: 700;
+    /* Versales por CSS y no tocando el texto, para que lo que lean los
+       buscadores y los lectores de pantalla siga siendo una frase normal. */
+    text-transform: uppercase;
+    /* NO bajar de 0.92. Es tentador cerrar más, porque las versales no tienen
+       astas ni colas — pero en español SÍ tienen acentos, y una Á o una Ó
+       suben mucho más que una mayúscula normal. Medido en esta tipografía:
+       mayúscula 0.713em, acentuada 0.901em. Con la cola de las versales
+       (0.016em), el piso donde dejan de chocar es 0.917em; a 0.88 la tilde de
+       la Ú se metía dentro de la línea de arriba. */
+    line-height: 0.96;
+    /* Y necesitan menos tracking negativo, o se tocan entre ellas. */
+    letter-spacing: -0.02em;
+    text-wrap: nowrap;
+    color: var(--fg);
+    transition: color 0.28s ease;
   }
-  /* Cada línea se revela desde debajo de su propia máscara. */
-  .line { display: block; overflow: hidden; padding-bottom: 0.04em; }
-  .line > span {
+
+  /* Hijos DIRECTOS: cada uno es una línea del titular. El combinador `>` no es
+     cosmético — con `h1 span` la regla alcanzaba también a la coma anidada y la
+     convertía en bloque, partiendo la línea en dos.
+
+     Y no bastaba con darle `display: inline` a la coma: el ámbito de Astro le
+     pone su atributo a CADA elemento del selector, así que
+     `h1[data-x] span[data-x]` (0,2,2) pesa más que `.acento[data-x]` (0,2,0).
+     Una clase no siempre gana aquí. */
+  h1 > span {
     display: block;
-    translate: 0 110%;
-    animation: line-in 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  .line:nth-child(1) > span { animation-delay: 0.05s; }
-  .line:nth-child(2) > span { animation-delay: 0.14s; }
-  .line:nth-child(3) > span { animation-delay: 0.23s; }
-  @keyframes line-in { to { translate: 0 0; } }
-
-  .lead {
-    margin: 1.5rem 0 0;
-    max-width: 22ch;
-    font-size: clamp(1.0625rem, 4.4vw, 1.375rem);
-    line-height: 1.4;
-    text-wrap: balance;
-    color: var(--color-chalk-2);
-    opacity: 0;
-    animation: fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) 0.42s forwards;
   }
 
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem 1.5rem;
-    margin-top: 2rem;
-    opacity: 0;
-    animation: fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) 0.54s forwards;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 52px;
-    padding: 0 2rem;
-    border-radius: 999px;
-    background: var(--color-lime);
-    color: var(--color-on-lime);
-    font-size: 1.0625rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    text-decoration: none;
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s;
-  }
-  .btn:hover { transform: translateY(-2px); filter: brightness(1.06); }
-  .btn:active { transform: translateY(0); }
-
-  .link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    color: var(--color-lime);
-    font-size: 1.0625rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    text-decoration: none;
-  }
-  .link:hover { text-decoration: underline; text-underline-offset: 0.3em; }
-
-  @keyframes fade-up {
-    from { opacity: 0; translate: 0 1rem; }
-    to   { opacity: 1; translate: 0 0; }
-  }
-
-  /* -------------------------------------------------------------- device -- */
-
-  .device {
-    position: absolute;
-    z-index: 1;
-    left: 50%;
-    top: 0;
-    display: flex;
-    /* Arranca asomando por el borde inferior: solo se ve su cuarto superior. */
-    translate: -50% 78dvh;
-    scale: 0.94;
-    transform-origin: 50% 0;
-  }
-
-  .frame {
-    position: relative;
-    z-index: 1;
-    height: min(78dvh, 700px);
-    aspect-ratio: 589 / 1280;
-    padding: 6px;
-    border-radius: 42px;
-    /* Riel metálico: la luz entra por arriba a la izquierda y devuelve un
-       brillo por abajo a la derecha. Es lo que separa al teléfono del fondo. */
-    background: linear-gradient(155deg, #4A4A4A 0%, #1E1E1E 22%, #131313 58%, #383838 100%);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.22),
-      inset 0 0 0 1px rgb(255 255 255 / 0.07),
-      0 2px 6px rgb(0 0 0 / 0.55),
-      0 60px 100px -38px rgb(0 0 0 / 1);
-  }
-  .frame img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top center;
-    border-radius: 36px;
-  }
-
-  /* El halo de lima: la única licencia de color del hero. */
-  .bloom {
-    position: absolute;
-    z-index: 0;
-    left: 50%;
-    top: -6%;
-    width: 240%;
-    aspect-ratio: 1;
-    translate: -50% 0;
-    border-radius: 50%;
-    background: radial-gradient(
-      circle,
-      color-mix(in oklab, var(--color-lime) 12%, transparent) 0%,
-      transparent 60%
-    );
-    pointer-events: none;
-  }
-
-  /* ------------------------------------------------- secuencia de scroll -- */
-
-  @supports (animation-timeline: view()) {
-    .copy,
-    .device {
-      animation-timing-function: linear;
-      animation-fill-mode: both;
-      animation-timeline: --stage;
-      animation-range: contain 0% contain 100%;
-    }
-    .copy   { animation-name: copy-out; }
-    .device { animation-name: device-in; }
-  }
-
-  @keyframes copy-out {
-    0%   { opacity: 1; translate: 0 0;        scale: 1; }
-    30%  { opacity: 0; translate: 0 -2.5rem;  scale: 0.96; }
-    100% { opacity: 0; translate: 0 -2.5rem;  scale: 0.96; }
-  }
-
-  @keyframes device-in {
-    /* Sube hasta quedar centrado… */
-    0%   { translate: -50% 78dvh; scale: 0.94; }
-    58%  { translate: -50% 11dvh; scale: 1; }
-    /* …y sigue acercándose, para que el scroll nunca se sienta muerto. */
-    100% { translate: -50% 4dvh;  scale: 1.06; }
-  }
-
-  /* ---------------------------------------------------------- escritorio -- */
-
-  @media (min-width: 900px) {
-    .copy { padding: 1.5rem 3rem 20dvh; }
-    .frame {
-      height: min(80dvh, 760px);
-      border-radius: 50px;
-      padding: 7px;
-    }
-    .frame img { border-radius: 43px; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .line > span, .lead, .actions { animation: none; translate: none; opacity: 1; }
-  }
 </style>

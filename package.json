@@ -5,7 +5,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "serve": "node scripts/serve.mjs",
+    "ver": "npm run build && node scripts/serve.mjs"
   },
   "repository": {
     "type": "git",

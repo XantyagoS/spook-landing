@@ -1,0 +1,216 @@
+---
+/**
+ * Navbar: la marca a la izquierda, el botón de tema a la derecha y, en el
+ * medio, EN QUÉ SECCIÓN ESTÁS.
+ *
+ * No es un menú: es un indicador. El nombre lo escribe cada sección con su
+ * prop `label` y el navbar lo va cambiando según cuál cruza la mitad de la
+ * pantalla.
+ *
+ * El valor inicial se sirve ya escrito desde el servidor, para que no aparezca
+ * vacío y se rellene después a la vista del usuario.
+ */
+const inicial = 'Inicio';
+---
+
+<header class="bar">
+  <div class="inner">
+    <a class="brand" href="/">Spook AI</a>
+
+    <p class="actual" data-actual>{inicial}</p>
+
+    <button id="theme-toggle" class="toggle" type="button" aria-label="Cambiar de tema">
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+      </svg>
+    </button>
+  </div>
+</header>
+
+<style>
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    /* Sin filete inferior: el desenfoque ya separa la barra del contenido.
+       Una línea de 1px de lado a lado es lo que delata una plantilla. */
+    transition: background-color 0.28s ease;
+  }
+
+  /* La misma columna que el contenido, para que la marca caiga exactamente
+     sobre el borde izquierdo de los títulos. Tres columnas: el grupo del medio
+     queda centrado en la BARRA y no respecto a la marca — con un flex simple,
+     el ancho de "Spook" lo desplazaría. La tercera está vacía a propósito, es
+     el contrapeso. */
+  .inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    max-width: var(--col-max);
+    margin-inline: auto;
+    padding-inline: var(--col-pad);
+  }
+
+  .brand {
+    grid-column: 1;
+    justify-self: start;
+    /* Una sola línea siempre: sin esto, en pantallas estrechas se partía en
+       "Spook / AI" y la barra crecía a dos filas. */
+    white-space: nowrap;
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    /* La marca no es un estado de navegación: va siempre en la tinta que
+       manda, no en el gris de lo inactivo. */
+    color: var(--fg);
+    text-decoration: none;
+    transition: color 0.28s ease;
+  }
+
+  /* El indicador. No es un enlace: no lleva a ninguna parte, dice dónde estás.
+     El punto lima debajo es la marca de "aquí". */
+  .actual {
+    position: relative;
+    grid-column: 2;
+    justify-self: center;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--nav-h);
+    margin: 0;
+    padding: 0 1rem;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    transition: color 0.28s ease, opacity 0.15s ease;
+  }
+
+  .actual::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    translate: -50% 0;
+    bottom: calc(50% - 0.5rem - 10px);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* -------------------------------------------------------------- toggle -- */
+
+  .toggle {
+    /* Al otro extremo: el hueco hasta el borde derecho es el mismo que el de
+       la marca hasta el izquierdo, porque las dos columnas de los lados miden
+       1fr y comparten el padding de la columna. */
+    grid-column: 3;
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    /* El icono va en el lima de la marca, no en el gris de lo inactivo: es el
+       único control de la barra y el acento lo señala. */
+    color: var(--accent);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  /* Al pasar por encima cambia el fondo, no el icono: el lima se queda. */
+  .toggle:hover {
+    background: var(--card);
+  }
+  .toggle svg {
+    width: 20px;
+    height: 20px;
+    /* Relleno además del trazo: la luna queda maciza y el sol con su disco
+       lleno. Los rayos son segmentos sin área, así que el relleno no los
+       afecta. */
+    fill: currentColor;
+  }
+
+  /* Se muestra el icono del tema al que se VA, no el actual. */
+  .sun  { display: none; }
+  :global(:root[data-theme="dark"]) .moon { display: none; }
+  :global(:root[data-theme="dark"]) .sun  { display: block; }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme="light"])) .moon { display: none; }
+    :global(:root:not([data-theme="light"])) .sun  { display: block; }
+  }
+  /* Una elección explícita gana siempre sobre la preferencia del sistema. */
+  :global(:root[data-theme="light"]) .moon { display: block; }
+  :global(:root[data-theme="light"]) .sun  { display: none; }
+
+  /* En pantallas estrechas la marca y el grupo se pelean por el sitio: el
+     grupo deja de estar centrado y se va a la derecha. */
+  /* En pantallas estrechas se aprieta un poco para que quepan marca,
+     indicador y botón sin esconder nada. */
+  @media (max-width: 430px) {
+    .brand { font-size: 1rem; }
+    .actual { padding-inline: 0.5rem; font-size: 0.9375rem; }
+    .toggle { width: 40px; height: 40px; }
+    .toggle svg { width: 18px; height: 18px; }
+  }
+</style>
+
+<script>
+  // --- el indicador de sección ---
+  const salida = document.querySelector('[data-actual]');
+  const secciones = document.querySelectorAll<HTMLElement>('[data-seccion]');
+
+  if (salida && secciones.length) {
+    const observador = new IntersectionObserver(
+      (entradas) => {
+        for (const e of entradas) {
+          // Con este margen, "intersecta" significa "cruza la mitad de la
+          // pantalla". Así solo una sección cumple a la vez y no hay que
+          // decidir empates.
+          if (!e.isIntersecting) continue;
+          const nombre = (e.target as HTMLElement).dataset.seccion;
+          if (!nombre || nombre === salida.textContent) continue;
+          salida.textContent = nombre;
+        }
+      },
+      { rootMargin: '-50% 0px -50% 0px' },
+    );
+    secciones.forEach((seccion) => observador.observe(seccion));
+  }
+
+  const KEY = 'spook-theme';
+  const root = document.documentElement;
+  const button = document.getElementById('theme-toggle');
+
+  const label = (theme: string) =>
+    theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro';
+
+  const paint = (theme: string) => {
+    root.dataset.theme = theme;
+    button?.setAttribute('aria-label', label(theme));
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', theme === 'dark' ? '#111111' : '#FFFFFF');
+  };
+
+  paint(root.dataset.theme ?? 'light');
+
+  button?.addEventListener('click', () => {
+    paint(root.dataset.theme === 'dark' ? 'light' : 'dark');
+    try {
+      localStorage.setItem(KEY, root.dataset.theme!);
+    } catch {
+      /* Navegación privada: el tema dura lo que dure la pestaña. */
+    }
+  });
+</script>

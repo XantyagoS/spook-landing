@@ -1,0 +1,64 @@
+---
+/**
+ * Pie de página: solo lo legal. Centrado, sobre la misma columna que el
+ * navbar y las secciones.
+ */
+const path = Astro.url.pathname;
+const enLegal = path.startsWith('/legal');
+
+const links = [
+  { href: '/legal.html#privacidad', label: 'Privacidad' },
+  { href: '/legal.html#terminos',   label: 'Términos' },
+];
+---
+
+<footer class="pie">
+  <nav class="inner" aria-label="Legal">
+    <ul>
+      {links.map(({ href, label }) => (
+        <li>
+          <a href={enLegal ? href.replace('/legal.html', '') : href}>{label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</footer>
+
+<style>
+  .pie {
+    padding-inline: var(--col-pad);
+    padding-block: 2.5rem 3rem;
+  }
+
+  /* La misma columna que el navbar y las secciones. */
+  .inner {
+    max-width: var(--col-max);
+    margin-inline: auto;
+  }
+
+  ul {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    /* 44px de alto mínimo: por debajo deja de ser cómodo con el dedo. */
+    min-height: 44px;
+    font-size: var(--type-small);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    /* El mismo gris callado que los enlaces inactivos del navbar. */
+    color: var(--fg-3);
+    transition: color 0.2s ease;
+  }
+  /* Al pasar por encima sube un escalón de la jerarquía, como en el navbar. */
+  a:hover { color: var(--fg-2); }
+</style>
